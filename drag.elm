@@ -81,7 +81,7 @@ updateHelp msg ({thingDict, drag} as model) =
             update : ThingID -> Thing -> Thing
             update _ thing =
               if drag.thing.id == thing.id
-              then { thing | position = getPosition (Just drag) thing.position }
+              then { thing | position = getPosition (Just drag) thing }
               else thing
             newThingDict : ThingDict
             newThingDict = (Dict.map update thingDict)
@@ -116,7 +116,7 @@ view model =
     drawThing : ThingID -> Thing -> Html Msg
     drawThing _ thing =
       let
-        realPosition = getPosition model.drag thing.position
+        realPosition = getPosition model.drag thing
       in
         div
           [ onMouseDown thing
@@ -148,16 +148,20 @@ px number =
   toString number ++ "px"
 
 
-getPosition : Maybe Drag -> Position -> Position
-getPosition drag position =
+getPosition : Maybe Drag -> Thing -> Position
+getPosition drag ({position, id}) =
   case drag of
     Nothing ->
       position
 
-    Just {start,current} ->
-      Position
-        (position.x + current.x - start.x)
-        (position.y + current.y - start.y)
+    Just {start, current, thing} ->
+      if thing.id == id
+      then
+        Position
+          (position.x + current.x - start.x)
+          (position.y + current.y - start.y)
+      else
+        position
 
 
 onMouseDown : Thing -> Attribute Msg
