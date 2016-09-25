@@ -1,3 +1,4 @@
+import Debug exposing (log)
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -22,6 +23,7 @@ main =
 
 type alias Model =
     { thingDict : ThingDict
+    , links : List Link
     , drag : Maybe Drag
     , hoverThing : Maybe Thing
     }
@@ -31,10 +33,14 @@ type alias Thing =
     , position : Position
     }
 
-type alias ThingID = Int
-type alias ThingDef = Position
-type alias ThingDict = Dict ThingID Thing
+type alias Link =
+  { source : Thing
+  , dest : Thing
+  }
 
+type alias ThingID = Int
+type alias ThingDict = Dict ThingID Thing
+type alias ThingDef = Position
 
 type alias Drag =
     { start : Position
@@ -45,11 +51,12 @@ type alias Drag =
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model initThingDict Nothing Nothing, Cmd.none )
+  ( Model initThingDict initLinks Nothing Nothing, Cmd.none )
 
+thingDefs : List ThingDef
 thingDefs =
   let
-    total = 20
+    total = 32
     r = 500.0
     cx = 500
     cy = 500
@@ -71,6 +78,18 @@ initThingDict =
     thingDefs
     |> (List.indexedMap mkThing)
     |> Dict.fromList
+
+pairs : List Thing -> List Link
+pairs xs =
+  case xs of
+    ( x :: x' :: xs' ) -> (Link x x') :: (pairs (x' :: xs'))
+    _ -> []
+
+initLinks : List Link
+initLinks =
+  [1, 11, 22]
+  |> List.filterMap (\x -> Dict.get x initThingDict)
+  |> pairs
 
 
 -- UPDATE
@@ -158,8 +177,8 @@ view model =
       in
         circle
           [ onMouseDown' thing
-          , onMouseEnter (HoverIn thing)
-          , onMouseLeave HoverOut
+          --, onMouseEnter (HoverIn thing)
+          --, onMouseLeave HoverOut
           , cx (realPosition.x |> toString)
           , cy (realPosition.y |> toString)
           , fill backgroundColor
@@ -169,12 +188,30 @@ view model =
               ]
           ]
           []
+    drawLink : Link -> Svg Msg
+    drawLink {source, dest} =
+      let
+        a = toString source.position.x
+        b = toString source.position.y
+        c = toString dest.position.x
+        d = toString dest.position.y
+      in
+        line
+          [ x1 a
+          , y1 b
+          , x2 c
+          , y2 d
+          , stroke "black" ]
+          []
   in
     Svg.svg
       [ width "100%"
       , height "100%"
       ]
-      (model.thingDict |> (Dict.map drawThing) |> Dict.values)
+      [
+        Svg.g [] (model.thingDict |> (Dict.map drawThing) |> Dict.values)
+      , Svg.g [] (model.links |> (List.map drawLink))
+      ]
 
 
 
