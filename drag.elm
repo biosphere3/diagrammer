@@ -1,6 +1,8 @@
-import Html exposing (..)
+import Html exposing (Html)
+import Svg exposing (..)
+import Svg.Attributes exposing (..)
 import Html.App as App
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (style)
 import Html.Events exposing (on, onMouseEnter, onMouseLeave)
 import Json.Decode as Json exposing ((:=))
 import Mouse exposing (Position)
@@ -145,7 +147,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let
-    drawThing : ThingID -> Thing -> Html Msg
+    drawThing : ThingID -> Thing -> Svg Msg
     drawThing _ thing =
       let
         realPosition = getPosition model.drag thing
@@ -154,30 +156,25 @@ view model =
           then "#3C8D2F"
           else "blue"
       in
-        div
+        circle
           [ onMouseDown' thing
           , onMouseEnter (HoverIn thing)
           , onMouseLeave HoverOut
-          , style
-              [ "background-color" => backgroundColor
-              , "cursor" => "move"
-
-              , "width" => "100px"
-              , "height" => "100px"
-              , "border-radius" => "4px"
-              , "position" => "absolute"
-              , "left" => px realPosition.x
-              , "top" => px realPosition.y
-
-              , "color" => "white"
-              , "display" => "flex"
-              , "align-items" => "center"
-              , "justify-content" => "center"
+          , cx (realPosition.x |> toString)
+          , cy (realPosition.y |> toString)
+          , fill backgroundColor
+          , r "50"
+          , Html.Attributes.style
+              [ "cursor" => "move"
               ]
           ]
-          [ text "Drag Me!"
-          ]
-  in div [] (model.thingDict |> (Dict.map drawThing) |> Dict.values)
+          []
+  in
+    Svg.svg
+      [ width "100%"
+      , height "100%"
+      ]
+      (model.thingDict |> (Dict.map drawThing) |> Dict.values)
 
 
 
@@ -205,14 +202,3 @@ getPosition drag ({position, id}) =
 onMouseDown' : Thing -> Attribute Msg
 onMouseDown' thing =
   on "mousedown" (Json.map (DragStart thing) Mouse.position)
-
-
-onMouseMove : Maybe Thing -> Attribute Msg
-onMouseMove thing =
-  let
-    msg =
-      case thing of
-        Nothing -> HoverOut
-        Just thing -> HoverIn thing
-  in
-    on "mousemove" (Json.succeed msg)
