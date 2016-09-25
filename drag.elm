@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
-import Html.Events exposing (on)
+import Html.Events exposing (on, onMouseEnter, onMouseLeave)
 import Json.Decode as Json exposing ((:=))
 import Mouse exposing (Position)
 
@@ -21,6 +21,7 @@ main =
 type alias Model =
     { thingDict : ThingDict
     , drag : Maybe Drag
+    , hoverThing : Maybe Thing
     }
 
 type alias Thing =
@@ -42,11 +43,11 @@ type alias Drag =
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model initThingDict Nothing, Cmd.none )
+  ( Model initThingDict Nothing Nothing, Cmd.none )
 
 thingDefs =
   let
-    total = 100
+    total = 20
     r = 500.0
     cx = 500
     cy = 500
@@ -77,6 +78,8 @@ type Msg
     = DragStart Thing Position
     | DragAt Position
     | DragEnd Position
+    | HoverIn Thing
+    | HoverOut
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,10 +91,10 @@ updateHelp : Msg -> Model -> Model
 updateHelp msg ({thingDict, drag} as model) =
   case msg of
     DragStart thing xy ->
-      Model thingDict (Just (Drag xy xy thing))
+      { model | drag = (Just (Drag xy xy thing)) }
 
     DragAt xy ->
-      Model thingDict (Maybe.map (\{start, thing} -> Drag start xy thing) drag)
+      { model | drag = (Maybe.map (\{start, thing} -> Drag start xy thing) drag) }
 
     DragEnd _ ->
       case drag of
@@ -106,7 +109,13 @@ updateHelp msg ({thingDict, drag} as model) =
             newThingDict : ThingDict
             newThingDict = (Dict.map update thingDict)
           in
-            Model newThingDict Nothing
+            { model | thingDict = newThingDict, drag = Nothing }
+
+    HoverIn thing ->
+      { model | hoverThing = Just thing}
+
+    HoverOut ->
+      { model | hoverThing = Nothing}
 
 
 
@@ -115,13 +124,16 @@ updateHelp msg ({thingDict, drag} as model) =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  case model.drag of
-    Nothing ->
-      Sub.none
+  let
+    dragging =
+      case model.drag of
+        Nothing ->
+          Sub.none
 
-    Just _ ->
-      Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
-
+        Just _ ->
+          Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
+  in
+    Sub.batch [ dragging ]
 
 
 -- VIEW
@@ -137,11 +149,17 @@ view model =
     drawThing _ thing =
       let
         realPosition = getPosition model.drag thing
+        backgroundColor =
+          if model.hoverThing == Just thing
+          then "#3C8D2F"
+          else "blue"
       in
         div
-          [ onMouseDown thing
+          [ onMouseDown' thing
+          , onMouseEnter (HoverIn thing)
+          , onMouseLeave HoverOut
           , style
-              [ "background-color" => "#3C8D2F"
+              [ "background-color" => backgroundColor
               , "cursor" => "move"
 
               , "width" => "100px"
@@ -184,6 +202,17 @@ getPosition drag ({position, id}) =
         position
 
 
-onMouseDown : Thing -> Attribute Msg
-onMouseDown thing =
+onMouseDown' : Thing -> Attribute Msg
+onMouseDown' thing =
   on "mousedown" (Json.map (DragStart thing) Mouse.position)
+
+
+onMouseMove : Maybe Thing -> Attribute Msg
+onMouseMove thing =
+  let
+    msg =
+      case thing of
+        Nothing -> HoverOut
+        Just thing -> HoverIn thing
+  in
+    on "mousemove" (Json.succeed msg)
