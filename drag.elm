@@ -29,6 +29,7 @@ type alias Thing =
     }
 
 type alias ThingID = Int
+type alias ThingDef = Position
 type alias ThingDict = Dict ThingID Thing
 
 
@@ -43,11 +44,30 @@ init : ( Model, Cmd Msg )
 init =
   ( Model initThingDict Nothing, Cmd.none )
 
+thingDefs =
+  let
+    total = 100
+    r = 500.0
+    cx = 500
+    cy = 500
+    getPos : Float -> Position
+    getPos n = Position
+      (floor ((cos n) * r + cx))
+      (floor ((sin n) * r + cy))
+  in
+    List.indexedMap
+      (\n _ -> (getPos ( 2 * pi * (toFloat n) / total)))
+      (List.repeat total 0)
+
 initThingDict : ThingDict
-initThingDict = Dict.fromList
-  [ (1, Thing 1 (Position 200 200))
-  , (2, Thing 2 (Position 400 400))
-  ]
+initThingDict =
+  let
+    mkThing : ThingID -> ThingDef -> (ThingID, Thing)
+    mkThing id position = (id, Thing id position)
+  in
+    thingDefs
+    |> (List.indexedMap mkThing)
+    |> Dict.fromList
 
 
 -- UPDATE
