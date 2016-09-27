@@ -23,8 +23,8 @@ main =
 
 
 type alias Model =
-  { processById : ProcessDict
-  --, portById : Dict ID Port
+  { processByID : ProcessDict
+  , portByID : Dict ID Port
   --, flowById : Dict ID Flow
 
   -- ui
@@ -41,14 +41,12 @@ type alias ProcessDict = Dict ID Process
 --  }
 
 type alias Process =
-  --Positioned (
     { id : ID
     , name : String
     , description : String
     , imageURL : Maybe String
     , position : Position
     }
-  --)
 
 type alias Flow =
   { source : Process
@@ -66,7 +64,8 @@ type MatterState = Solid | Liquid | Gas | Plasma
 type PortDirection = Input | Output
 
 type alias Port =
-  { name : String
+  { id : ID
+  , name : String
   , processID : ID
   , rate : Float
   , direction : PortDirection
@@ -80,33 +79,47 @@ type alias Drag =
   }
 
 
-toDictByID : List Process -> ProcessDict
+toDictByID : List { a | id : ID } -> Dict ID { a | id : ID }
 toDictByID seq =
   seq
   |> List.indexedMap (\i data -> (i, { data | id = i }))
   |> Dict.fromList
 
+getUnsafe : comparable -> Dict comparable b -> b
+getUnsafe v d =
+  case Dict.get v d of
+    Nothing -> (Debug.crash <| "Failed lookup: " ++ (toString v) ++ " of " ++ (toString d))
+    Just ret -> ret
 
-mkProcess : { name : String, position : Position } -> Process
-mkProcess data =
-  Process 0 data.name "" Nothing data.position
-  --{ data | id = 0, imageURL = Nothing, position = Position 0 0 }
+mkProcess {name, position} = Process 0 name "" Nothing position
+
+mkPort processByID {name, processID, direction} =
+  let
+    process = case Dict.get processID processByID of
+      Just process -> process
+      Nothing -> (Debug.crash (toString processID))
+    position = Position 20 20
+  in Port 0 name processID 42.0 direction position
 
 init : ( Model, Cmd Msg )
 init =
   let
-    processById : ProcessDict
-    processById =
+    processByID : ProcessDict
+    processByID =
       [ { name = "Biodigester", position = Position 100 100 }
       , { name = "Can of Beans", position = Position 300 400 }
       , { name = "Can of Beans", position = Position 500 200 }
       ] |> (List.map mkProcess) |> toDictByID
-    portById = [] |> toDictByID
+    portByID : Dict ID Port
+    portByID =
+      [ { name = "Effluent", processID = 1, direction = Input }
+      , { name = "Biogas", processID = 1, direction = Output }
+      ] |> (List.map (mkPort processByID)) |> toDictByID
     flowById = [] |> toDictByID
   in (
     Model
-      processById
-      --Dict.empty
+      processByID
+      portByID
       --Dict.empty
       Nothing
      , Cmd.none )
@@ -127,7 +140,7 @@ update msg model =
 
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processById, drag} as model) =
+updateHelp msg ({processByID, drag} as model) =
   case msg of
     DragStart process xy ->
       { model | drag = (Just (Drag xy xy process)) }
@@ -146,9 +159,9 @@ updateHelp msg ({processById, drag} as model) =
               then { process | position = getPosition (Just drag) process }
               else process
             newprocessById : ProcessDict
-            newprocessById = (Dict.map update processById)
+            newprocessById = (Dict.map update processByID)
           in
-            { model | processById = newprocessById, drag = Nothing }
+            { model | processByID = newprocessById, drag = Nothing }
 
 
 
@@ -178,8 +191,8 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   let
-    drawProcess : ID -> Process -> Svg Msg
-    drawProcess _ process =
+    drawProcess : Process -> Svg Msg
+    drawProcess process =
       let
         realPosition = getPosition model.drag process
         backgroundColor = "blue"
@@ -201,8 +214,19 @@ view model =
               ]
           ]
           []
+
+    drawPort : Port -> Svg Msg
+    drawPort flowport =
+      let
+        process = getUnsafe flowport.processID model.processByID
+      in
+        circle
+          [ cx (process.position.x + flowport.position.x |> toString)
+          , cy (process.position.y + flowport.position.y |> toString)
+          , r "20"
+          ] []
     --drawLink : Model -> Flow -> Svg Msg
-    --drawLink {processById} {source, dest} =
+    --drawLink {processByID} {source, dest} =
     --  let
     --    a = toString source.position.x
     --    b = toString source.position.y
@@ -222,8 +246,8 @@ view model =
       , height "100%"
       ]
       [
-        Svg.g [] (Dict.map drawProcess model.processById |> Dict.values)
-      --, Svg.g [] (List.map (drawLink model) model.links)
+        Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
+      , Svg.g [] (model.portByID |> Dict.values |> List.map drawPort)
       ]
 
 
