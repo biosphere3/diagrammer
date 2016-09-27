@@ -188,8 +188,8 @@ view model =
               ]
           ]
           []
-    drawLink : Link -> Svg Msg
-    drawLink {source, dest} =
+    drawLink : Model -> Link -> Svg Msg
+    drawLink model {source, dest} =
       let
         a = toString source.position.x
         b = toString source.position.y
@@ -209,8 +209,8 @@ view model =
       , height "100%"
       ]
       [
-        Svg.g [] (model.thingDict |> (Dict.map drawThing) |> Dict.values)
-      , Svg.g [] (model.links |> (List.map drawLink))
+        Svg.g [] (Dict.map drawThing model.thingDict |> Dict.values)
+      , Svg.g [] (List.map (drawLink model) model.links)
       ]
 
 
