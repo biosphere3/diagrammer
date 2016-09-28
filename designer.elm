@@ -10,6 +10,8 @@ import Mouse exposing (Position)
 
 import Dict exposing (Dict)
 
+import Util exposing (..)
+
 main =
   App.program
     { init = init
@@ -81,18 +83,6 @@ type alias Drag =
   }
 
 
-toDictByID : List { a | id : ID } -> Dict ID { a | id : ID }
-toDictByID seq =
-  seq
-  |> List.indexedMap (\i data -> (i, { data | id = i }))
-  |> Dict.fromList
-
-seize : comparable -> Dict comparable b -> b
-seize v d =
-  case Dict.get v d of
-    Nothing -> (Debug.crash <| "Failed lookup: " ++ (toString v) ++ " of " ++ (toString d))
-    Just ret -> ret
-
 mkProcess {name, position} = Process 0 name "" Nothing position
 
 mkPort processByID {name, processID, direction} =
@@ -138,14 +128,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   ( updateHelp msg model, Cmd.none )
-
-
-updateMulti : List comparable -> (Maybe a -> Maybe a) -> Dict comparable a -> Dict comparable a
-updateMulti keys f dict =
-  List.foldl
-    (\k d -> Dict.update k f d)
-    dict
-    keys
 
 getPorts : Model -> Process -> List Port
 getPorts {portByID} process =
