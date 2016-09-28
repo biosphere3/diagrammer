@@ -87,8 +87,8 @@ toDictByID seq =
   |> List.indexedMap (\i data -> (i, { data | id = i }))
   |> Dict.fromList
 
-getUnsafe : comparable -> Dict comparable b -> b
-getUnsafe v d =
+seize : comparable -> Dict comparable b -> b
+seize v d =
   case Dict.get v d of
     Nothing -> (Debug.crash <| "Failed lookup: " ++ (toString v) ++ " of " ++ (toString d))
     Just ret -> ret
@@ -100,7 +100,7 @@ mkPort processByID {name, processID, direction} =
     process = case Dict.get processID processByID of
       Just process -> process
       Nothing -> (Debug.crash (toString processID))
-    position = Position 20 20
+    position = addPos process.position <| Position 50 50
   in Port 0 name processID 42.0 direction position
 
 init : ( Model, Cmd Msg )
@@ -115,7 +115,7 @@ init =
     portByID : Dict ID Port
     portByID =
       [ { name = "Effluent", processID = 1, direction = Input }
-      , { name = "Biogas", processID = 1, direction = Output }
+      , { name = "Biogas", processID = 2, direction = Output }
       ] |> (List.map (mkPort processByID)) |> toDictByID
     flowById = [] |> toDictByID
   in (
@@ -140,8 +140,21 @@ update msg model =
   ( updateHelp msg model, Cmd.none )
 
 
+updateMulti : List comparable -> (Maybe a -> Maybe a) -> Dict comparable a -> Dict comparable a
+updateMulti keys f dict =
+  List.foldl
+    (\k d -> Dict.update k f d)
+    dict
+    keys
+
+getPorts : Model -> Process -> List Port
+getPorts {portByID} process =
+  portByID
+  |> Dict.values
+  |> List.filter (\x -> x.processID == process.id)
+
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processByID, drag} as model) =
+updateHelp msg ({processByID, portByID, drag} as model) =
   case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
@@ -151,22 +164,29 @@ updateHelp msg ({processByID, drag} as model) =
 
     DragEnd _ ->
       case drag of
-        Nothing -> model  -- will never happen
+        Nothing -> Debug.crash "not gonna happen"
         Just drag ->
           case drag.target of
             DragProcess dragProcess ->
               let
-                update : ID -> Process -> Process
-                update _ process =
-                  if dragProcess.id == process.id
-                  then { process | position = getPosition (Just drag) process }
-                  else process
-                newprocessById : ProcessDict
-                newprocessById = (Dict.map update processByID)
+                updatePosition process =
+                  { process | position = getProcessPosition model process }
+                updatePortPosition flowport =
+                  { flowport | position = getPortPosition model flowport }
+                attachedPorts = getPorts model dragProcess
               in
-                { model | processByID = newprocessById, drag = Nothing }
-            DragPort flowport ->
-              model
+                { model
+                | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updatePosition)
+                , portByID = portByID |> updateMulti (List.map .id attachedPorts) (Maybe.map updatePortPosition)
+                , drag = Nothing }
+            DragPort dragPort ->
+              let
+                updatePosition flowport =
+                  { flowport | position = getPortPosition model flowport }
+              in
+                { model
+                | portByID = portByID |> Dict.update dragPort.id (Maybe.map updatePosition)
+                , drag = Nothing }
 
 
 
@@ -199,8 +219,8 @@ view model =
     drawProcess : Process -> Svg Msg
     drawProcess process =
       let
-        realPosition = getPosition model.drag process
         backgroundColor = "blue"
+        realPosition = getProcessPosition model process
         cx = realPosition.x
         cy = realPosition.y
         w = 150
@@ -223,12 +243,14 @@ view model =
     drawPort : Port -> Svg Msg
     drawPort flowport =
       let
-        process = getUnsafe flowport.processID model.processByID
+        process = seize flowport.processID model.processByID
+        portPosition = getPortPosition model flowport
       in
         circle
-          [ cx (process.position.x + flowport.position.x |> toString)
-          , cy (process.position.y + flowport.position.y |> toString)
+          [ cx (portPosition.x |> toString)
+          , cy (portPosition.y |> toString)
           , r "20"
+          , onMouseDown' <| DragPort flowport
           ] []
     --drawLink : Model -> Flow -> Svg Msg
     --drawLink {processByID} {source, dest} =
@@ -262,24 +284,58 @@ px number =
   toString number ++ "px"
 
 
-getPosition : Maybe Drag -> Process -> Position
-getPosition drag ({position, id}) =
-  case drag of
-    Nothing ->
-      position
+getDraggableID : Draggable -> String
+getDraggableID draggable =
+  case draggable of
+    DragProcess p -> "process-" ++ (toString p.id)
+    DragPort p -> "port-" ++ (toString p.id)
 
-    Just {start, current, target} ->
-      case target of
-        DragProcess process ->
-          if process.id == id
-          then
-            Position
-              (position.x + current.x - start.x)
-              (position.y + current.y - start.y)
-          else
-            position
-        DragPort {id} ->
-          position
+dragOffset {current, start} =
+  Position
+    (current.x - start.x)
+    (current.y - start.y)
+
+getProcessPosition : Model -> Process -> Position
+getProcessPosition {drag} {id, position} =
+    case drag of
+      Nothing ->
+        position
+
+      Just {start, current, target} ->
+        case target of
+          DragProcess dragProcess ->
+            if dragProcess.id == id
+            then
+              Position
+                (position.x + current.x - start.x)
+                (position.y + current.y - start.y)
+            else
+              position
+          _ -> position
+
+addPos p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
+
+getPortPosition : Model -> Port -> Position
+getPortPosition {drag, processByID} {id, position, processID} =
+  let
+    process = seize processID processByID
+  in
+    case drag of
+      Nothing ->
+        position
+
+      Just ({start, current, target} as drag) ->
+        let offset = dragOffset drag
+        in
+          case target of
+            DragProcess dragProcess ->
+              if dragProcess.id == process.id
+              then addPos position offset
+              else position
+            DragPort dragPort ->
+              if dragPort.id == id
+              then addPos position offset
+              else position
 
 
 onMouseDown' : Draggable -> Attribute Msg
