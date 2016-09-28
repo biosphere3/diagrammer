@@ -59,6 +59,8 @@ type alias Resource =
   , state : MatterState
   }
 
+type Draggable = DragProcess Process | DragPort Port
+
 type MatterState = Solid | Liquid | Gas | Plasma
 
 type PortDirection = Input | Output
@@ -75,7 +77,7 @@ type alias Port =
 type alias Drag =
   { start : Position
   , current : Position
-  , process : Process
+  , target : Draggable
   }
 
 
@@ -129,10 +131,9 @@ init =
 
 
 type Msg
-    = DragStart Process Position
+    = DragStart Draggable Position
     | DragAt Position
     | DragEnd Position
-
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -142,26 +143,30 @@ update msg model =
 updateHelp : Msg -> Model -> Model
 updateHelp msg ({processByID, drag} as model) =
   case msg of
-    DragStart process xy ->
-      { model | drag = (Just (Drag xy xy process)) }
+    DragStart target xy ->
+      { model | drag = (Just (Drag xy xy target)) }
 
     DragAt xy ->
-      { model | drag = (Maybe.map (\{start, process} -> Drag start xy process) drag) }
+      { model | drag = (Maybe.map (\{start, target} -> Drag start xy target) model.drag) }
 
     DragEnd _ ->
       case drag of
         Nothing -> model  -- will never happen
         Just drag ->
-          let
-            update : ID -> Process -> Process
-            update _ process =
-              if drag.process.id == process.id
-              then { process | position = getPosition (Just drag) process }
-              else process
-            newprocessById : ProcessDict
-            newprocessById = (Dict.map update processByID)
-          in
-            { model | processByID = newprocessById, drag = Nothing }
+          case drag.target of
+            DragProcess dragProcess ->
+              let
+                update : ID -> Process -> Process
+                update _ process =
+                  if dragProcess.id == process.id
+                  then { process | position = getPosition (Just drag) process }
+                  else process
+                newprocessById : ProcessDict
+                newprocessById = (Dict.map update processByID)
+              in
+                { model | processByID = newprocessById, drag = Nothing }
+            DragPort flowport ->
+              model
 
 
 
@@ -202,7 +207,7 @@ view model =
         h = floor(150 * 1.9)
       in
         rect
-          [ onMouseDown' process
+          [ onMouseDown' <| DragProcess process
           , x (cx - w // 2 |> toString)
           , y (cy - h // 2 |> toString)
           , width (w |> toString)
@@ -263,16 +268,20 @@ getPosition drag ({position, id}) =
     Nothing ->
       position
 
-    Just {start, current, process} ->
-      if process.id == id
-      then
-        Position
-          (position.x + current.x - start.x)
-          (position.y + current.y - start.y)
-      else
-        position
+    Just {start, current, target} ->
+      case target of
+        DragProcess process ->
+          if process.id == id
+          then
+            Position
+              (position.x + current.x - start.x)
+              (position.y + current.y - start.y)
+          else
+            position
+        DragPort {id} ->
+          position
 
 
-onMouseDown' : Process -> Attribute Msg
-onMouseDown' process =
-  on "mousedown" (Json.map (DragStart process) Mouse.position)
+onMouseDown' : Draggable -> Attribute Msg
+onMouseDown' target =
+  on "mousedown" (Json.map (DragStart target) Mouse.position)
