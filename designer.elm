@@ -90,7 +90,7 @@ mkPort processByID {name, processID, direction} =
     process = case Dict.get processID processByID of
       Just process -> process
       Nothing -> (Debug.crash (toString processID))
-    position = addPos process.position <| Position 50 50
+    position = process.position /+/ Position 50 50
   in Port 0 name processID 42.0 direction position
 
 init : ( Model, Cmd Msg )
@@ -266,12 +266,6 @@ px number =
   toString number ++ "px"
 
 
-getDraggableID : Draggable -> String
-getDraggableID draggable =
-  case draggable of
-    DragProcess p -> "process-" ++ (toString p.id)
-    DragPort p -> "port-" ++ (toString p.id)
-
 dragOffset {current, start} =
   Position
     (current.x - start.x)
@@ -295,7 +289,7 @@ getProcessPosition {drag} {id, position} =
               position
           _ -> position
 
-addPos p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
+(/+/) p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
 
 getPortPosition : Model -> Port -> Position
 getPortPosition {drag, processByID} {id, position, processID} =
@@ -312,11 +306,11 @@ getPortPosition {drag, processByID} {id, position, processID} =
           case target of
             DragProcess dragProcess ->
               if dragProcess.id == process.id
-              then addPos position offset
+              then position /+/ offset
               else position
             DragPort dragPort ->
               if dragPort.id == id
-              then addPos position offset
+              then position /+/ offset
               else position
 
 
