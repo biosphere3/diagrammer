@@ -42,6 +42,8 @@ type alias ProcessDict = Dict ID Process
 --  { a | position : Position
 --  }
 
+jackRadius = 20
+
 type alias Process =
     { id : ID
     , name : String
@@ -61,7 +63,7 @@ type alias Resource =
   , state : MatterState
   }
 
-type Draggable = DragProcess Process | DragPort Jack
+type Draggable = DragProcess Process | DragJack Jack
 
 type MatterState = Solid | Liquid | Gas | Plasma
 
@@ -85,7 +87,7 @@ type alias Drag =
 
 mkProcess {name, position} = Process 0 name "" Nothing position
 
-mkPort processByID {name, processID, direction} =
+mkJack processByID {name, processID, direction} =
   let
     process = case Dict.get processID processByID of
       Just process -> process
@@ -106,7 +108,7 @@ init =
     jackByID =
       [ { name = "Effluent", processID = 1, direction = Input }
       , { name = "Biogas", processID = 2, direction = Output }
-      ] |> (List.map (mkPort processByID)) |> toDictByID
+      ] |> (List.map (mkJack processByID)) |> toDictByID
     flowById = [] |> toDictByID
   in (
     Model
@@ -119,6 +121,18 @@ init =
 
 -- UPDATE
 
+jacksCollide : Jack -> Jack -> Bool
+jacksCollide a b =
+  (log "dists" <| distanceSquared a.position b.position) < jackRadius * jackRadius
+
+
+jackCollisions : Model -> Jack -> List Jack
+jackCollisions model jack =
+  let
+    jacks = Dict.values model.jackByID
+    hit = \j -> j.id /= jack.id && (jacksCollide jack j)
+  in
+    List.filter hit jacks
 
 
 type Msg
@@ -130,8 +144,8 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   ( updateHelp msg model, Cmd.none )
 
-getPorts : Model -> Process -> List Jack
-getPorts {jackByID} process =
+getJacks : Model -> Process -> List Jack
+getJacks {jackByID} process =
   jackByID
   |> Dict.values
   |> List.filter (\x -> x.processID == process.id)
@@ -149,27 +163,32 @@ updateHelp msg ({processByID, jackByID, drag} as model) =
       case drag of
         Nothing -> Debug.crash "not gonna happen"
         Just drag ->
-          case drag.target of
+          let
+            model' = { model | drag = Nothing }
+            updateProcessPosition process =
+              { process | position = getProcessPosition model process }
+            updateJackPosition jack =
+              { jack | position = getJackPosition model jack }
+          in case drag.target of
             DragProcess dragProcess ->
               let
-                updatePosition process =
-                  { process | position = getProcessPosition model process }
-                updatePortPosition jack =
-                  { jack | position = getPortPosition model jack }
-                attachedPorts = getPorts model dragProcess
+                attachedJacks = getJacks model dragProcess
               in
-                { model
-                | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updatePosition)
-                , jackByID = jackByID |> updateMulti (List.map .id attachedPorts) (Maybe.map updatePortPosition)
-                , drag = Nothing }
-            DragPort dragPort ->
+                { model'
+                | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updateProcessPosition)
+                , jackByID = jackByID |> updateMulti (List.map .id attachedJacks) (Maybe.map updateJackPosition)
+                }
+            DragJack dragJack ->
               let
-                updatePosition jack =
-                  { jack | position = getPortPosition model jack }
+                collisions = jackCollisions model (updateJackPosition dragJack)
               in
-                { model
-                | jackByID = jackByID |> Dict.update dragPort.id (Maybe.map updatePosition)
-                , drag = Nothing }
+                if List.length collisions > 0
+                then
+                  { model'
+                  | jackByID = jackByID |> Dict.update dragJack.id (Maybe.map updateJackPosition)
+                  }
+                else
+                  model'
 
 
 
@@ -223,17 +242,17 @@ view model =
           ]
           []
 
-    drawPort : Jack -> Svg Msg
-    drawPort jack =
+    drawJack : Jack -> Svg Msg
+    drawJack jack =
       let
         process = seize jack.processID model.processByID
-        jackPosition = getPortPosition model jack
+        jackPosition = getJackPosition model jack
       in
         circle
-          [ cx (jackPosition.x |> toString)
-          , cy (jackPosition.y |> toString)
-          , r "20"
-          , onMouseDown' <| DragPort jack
+          [ cx <| toString jackPosition.x
+          , cy <| toString jackPosition.y
+          , r <| toString jackRadius
+          , onMouseDown' <| DragJack jack
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
@@ -260,7 +279,7 @@ view model =
       ]
       [
         Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
-      , Svg.g [] (model.jackByID |> Dict.values |> List.map drawPort)
+      , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
       ]
 
 
@@ -294,9 +313,15 @@ getProcessPosition {drag} {id, position} =
           _ -> position
 
 (/+/) p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
+(/-/) p1 p2 = Position (p1.x - p2.x) (p1.y - p2.y)
 
-getPortPosition : Model -> Jack -> Position
-getPortPosition {drag, processByID} {id, position, processID} =
+norm  p = p.x * p.x + p.y * p.y
+distanceSquared : Position -> Position -> Int
+distanceSquared p1 p2 = norm <| p1 /-/ p2
+distance p1 p2 = sqrt <| toFloat <| distanceSquared p1 p2
+
+getJackPosition : Model -> Jack -> Position
+getJackPosition {drag, processByID} {id, position, processID} =
   let
     process = seize processID processByID
   in
@@ -312,8 +337,8 @@ getPortPosition {drag, processByID} {id, position, processID} =
               if dragProcess.id == process.id
               then position /+/ offset
               else position
-            DragPort dragPort ->
-              if dragPort.id == id
+            DragJack dragJack ->
+              if dragJack.id == id
               then position /+/ offset
               else position
 
