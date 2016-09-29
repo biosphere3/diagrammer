@@ -295,35 +295,27 @@ view model =
         w = 150
         h = floor(150 * 1.9)
       in
-        rect
+        drawShape process.shape realPosition
           [ onMouseDown' <| DragProcess process
-          , x (cx - w // 2 |> toString)
-          , y (cy - h // 2 |> toString)
-          , width (w |> toString)
-          , height (h |> toString)
           , fill backgroundColor
           , stroke "white"
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
           ]
-          []
 
     drawJack : Jack -> Svg Msg
     drawJack jack =
       let
-        process = seize jack.processID model.processByID
         jackPosition = getJackPosition model jack
       in
-        circle
-          [ cx <| toString jackPosition.x
-          , cy <| toString jackPosition.y
-          , r <| toString jackRadius
-          , onMouseDown' <| DragJack jack
+        drawShape jack.shape jackPosition
+          [ onMouseDown' <| DragJack jack
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
-          ] []
+          ]
+
     --drawLink : Model -> Flow -> Svg Msg
     --drawLink {processByID} {source, dest} =
     --  let
@@ -344,8 +336,7 @@ view model =
       [ width "100%"
       , height "100%"
       ]
-      [
-        Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
+      [ Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
       , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
       ]
 
