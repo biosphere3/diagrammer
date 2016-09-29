@@ -26,8 +26,9 @@ main =
 
 type alias Model =
   { processByID : ProcessDict
-  , jackByID : Dict ID Jack
-  --, flowById : Dict ID Flow
+  , jackByID : JackDict
+  , flowByID : FlowDict
+  , containerByID : ContainerDict
 
   -- ui
   , drag : Maybe Drag
@@ -37,6 +38,9 @@ type alias Model =
 type alias ID = Int
 
 type alias ProcessDict = Dict ID Process
+type alias JackDict = Dict ID Jack
+type alias FlowDict = Dict ID Flow
+type alias ContainerDict = Dict ID Container
 
 --type alias Positioned a =
 --  { a | position : Position
@@ -53,9 +57,15 @@ type alias Process =
     }
 
 type alias Flow =
-  { source : Process
-  , dest : Process
-  , via : Resource
+  { containerID : ID
+  , jackID : ID
+  , direction : FlowDirection
+  --, via : Resource
+  }
+
+type alias Container =
+  { name : String
+  , position : Position
   }
 
 type alias Resource =
@@ -63,11 +73,16 @@ type alias Resource =
   , state : MatterState
   }
 
+type Shape = Rect Position Int Int
+           | Chevron Position Int Int
+           | Circle Position Int
+
 type Draggable = DragProcess Process | DragJack Jack
 
 type MatterState = Solid | Liquid | Gas | Plasma
 
 type JackDirection = Input | Output
+type FlowDirection = InFlow | OutFlow
 
 type alias Jack =
   { id : ID
@@ -87,6 +102,10 @@ type alias Drag =
 
 mkProcess {name, position} = Process 0 name "" Nothing position
 
+mkContainer {name, position} = Container name position
+
+mkFlow {containerID, jackID, direction} = Flow containerID jackID direction
+
 mkJack processByID {name, processID, direction} =
   let
     process = case Dict.get processID processByID of
@@ -104,16 +123,26 @@ init =
       , { name = "Can of Beans", position = Position 300 400 }
       , { name = "Can of Beans", position = Position 500 200 }
       ] |> (List.map mkProcess) |> toDictByID
-    jackByID : Dict ID Jack
+
+    jackByID : JackDict
     jackByID =
       [ { name = "Effluent", processID = 1, direction = Input }
       , { name = "Biogas", processID = 2, direction = Output }
       ] |> (List.map (mkJack processByID)) |> toDictByID
-    flowById = [] |> toDictByID
+
+    --flowByID : FlowDict
+    --flowByID =
+    --  [] |> (List.map mkFlow) |> toDictByID
+
+    --containerByID : ContainerDict
+    --containerByID =
+    --  [  ] |> (List.map mkContainer) |> toDictByID
   in (
     Model
       processByID
       jackByID
+      Dict.empty --flowByID
+      Dict.empty --containerByID
       --Dict.empty
       Nothing
      , Cmd.none )
@@ -149,6 +178,12 @@ getJacks {jackByID} process =
   jackByID
   |> Dict.values
   |> List.filter (\x -> x.processID == process.id)
+
+
+joinJacks : Model -> List Jack -> Model
+joinJacks model jacks = model
+  -- add a link between these jacks
+
 
 updateHelp : Msg -> Model -> Model
 updateHelp msg ({processByID, jackByID, drag} as model) =
