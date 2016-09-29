@@ -54,18 +54,22 @@ type alias Process =
     , description : String
     , imageURL : Maybe String
     , position : Position
+    , shape : Shape
     }
 
 type alias Flow =
-  { containerID : ID
+  { id : ID
+  , containerID : ID
   , jackID : ID
   , direction : FlowDirection
   --, via : Resource
   }
 
 type alias Container =
-  { name : String
+  { id : ID
+  , name : String
   , position : Position
+  , shape : Shape
   }
 
 type alias Resource =
@@ -73,9 +77,9 @@ type alias Resource =
   , state : MatterState
   }
 
-type Shape = Rect Position Int Int
-           | Chevron Position Int Int
-           | Circle Position Int
+type Shape = Rect Int Int
+           | Chevron Int Int
+           | Circle Int
 
 type Draggable = DragProcess Process | DragJack Jack
 
@@ -91,6 +95,7 @@ type alias Jack =
   , rate : Float
   , direction : JackDirection
   , position : Position
+  , shape : Shape
   }
 
 type alias Drag =
@@ -100,9 +105,9 @@ type alias Drag =
   }
 
 
-mkProcess {name, position} = Process 0 name "" Nothing position
+mkProcess {name, position} = Process 0 name "" Nothing position (Rect 160 80)
 
-mkContainer {name, position} = Container name position
+mkContainer {name, position} = Container 0 name position (Rect 160 80)
 
 mkFlow {containerID, jackID, direction} = Flow containerID jackID direction
 
@@ -112,7 +117,8 @@ mkJack processByID {name, processID, direction} =
       Just process -> process
       Nothing -> (Debug.crash (toString processID))
     position = process.position /+/ Position 50 50
-  in Jack 0 name processID 42.0 direction position
+    shape = Circle jackRadius
+  in Jack 0 name processID 42.0 direction position shape
 
 init : ( Model, Cmd Msg )
 init =
@@ -134,9 +140,10 @@ init =
     --flowByID =
     --  [] |> (List.map mkFlow) |> toDictByID
 
-    --containerByID : ContainerDict
-    --containerByID =
-    --  [  ] |> (List.map mkContainer) |> toDictByID
+    containerByID : ContainerDict
+    containerByID =
+      [ { name = "Rain Barrel", position = Position 100 600}
+      ] |> (List.map mkContainer) |> toDictByID
   in (
     Model
       processByID
@@ -249,6 +256,31 @@ subscriptions model =
 
 (=>) = (,)
 
+drawShape : Shape -> Position -> List (Svg.Attribute Msg) -> Svg Msg
+drawShape shape position attrs =
+  case shape of
+    Rect w h ->
+      let
+        cx = position.x
+        cy = position.y
+      in
+        rect
+        ( [ x (cx - w // 2 |> toString)
+          , y (cy - h // 2 |> toString)
+          , width (w |> toString)
+          , height (h |> toString)
+          ] ++ attrs )
+          []
+    Circle radius ->
+      circle
+      ( [ cx <| toString position.x
+        , cy <| toString position.y
+        , r <| toString radius
+        ] ++ attrs )
+        []
+    Chevron width height ->
+      drawShape (Circle width) position attrs
+
 
 view : Model -> Html Msg
 view model =
@@ -256,7 +288,7 @@ view model =
     drawProcess : Process -> Svg Msg
     drawProcess process =
       let
-        backgroundColor = "blue"
+        backgroundColor = "cornflowerblue"
         realPosition = getProcessPosition model process
         cx = realPosition.x
         cy = realPosition.y
@@ -269,8 +301,8 @@ view model =
           , y (cy - h // 2 |> toString)
           , width (w |> toString)
           , height (h |> toString)
-          , stroke backgroundColor
-          , fill "white"
+          , fill backgroundColor
+          , stroke "white"
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
