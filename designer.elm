@@ -26,7 +26,7 @@ main =
 
 type alias Model =
   { processByID : ProcessDict
-  , portByID : Dict ID Port
+  , jackByID : Dict ID Jack
   --, flowById : Dict ID Flow
 
   -- ui
@@ -61,18 +61,18 @@ type alias Resource =
   , state : MatterState
   }
 
-type Draggable = DragProcess Process | DragPort Port
+type Draggable = DragProcess Process | DragPort Jack
 
 type MatterState = Solid | Liquid | Gas | Plasma
 
-type PortDirection = Input | Output
+type JackDirection = Input | Output
 
-type alias Port =
+type alias Jack =
   { id : ID
   , name : String
   , processID : ID
   , rate : Float
-  , direction : PortDirection
+  , direction : JackDirection
   , position : Position
   }
 
@@ -91,7 +91,7 @@ mkPort processByID {name, processID, direction} =
       Just process -> process
       Nothing -> (Debug.crash (toString processID))
     position = process.position /+/ Position 50 50
-  in Port 0 name processID 42.0 direction position
+  in Jack 0 name processID 42.0 direction position
 
 init : ( Model, Cmd Msg )
 init =
@@ -102,8 +102,8 @@ init =
       , { name = "Can of Beans", position = Position 300 400 }
       , { name = "Can of Beans", position = Position 500 200 }
       ] |> (List.map mkProcess) |> toDictByID
-    portByID : Dict ID Port
-    portByID =
+    jackByID : Dict ID Jack
+    jackByID =
       [ { name = "Effluent", processID = 1, direction = Input }
       , { name = "Biogas", processID = 2, direction = Output }
       ] |> (List.map (mkPort processByID)) |> toDictByID
@@ -111,13 +111,14 @@ init =
   in (
     Model
       processByID
-      portByID
+      jackByID
       --Dict.empty
       Nothing
      , Cmd.none )
 
 
 -- UPDATE
+
 
 
 type Msg
@@ -129,14 +130,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   ( updateHelp msg model, Cmd.none )
 
-getPorts : Model -> Process -> List Port
-getPorts {portByID} process =
-  portByID
+getPorts : Model -> Process -> List Jack
+getPorts {jackByID} process =
+  jackByID
   |> Dict.values
   |> List.filter (\x -> x.processID == process.id)
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processByID, portByID, drag} as model) =
+updateHelp msg ({processByID, jackByID, drag} as model) =
   case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
@@ -153,21 +154,21 @@ updateHelp msg ({processByID, portByID, drag} as model) =
               let
                 updatePosition process =
                   { process | position = getProcessPosition model process }
-                updatePortPosition flowport =
-                  { flowport | position = getPortPosition model flowport }
+                updatePortPosition jack =
+                  { jack | position = getPortPosition model jack }
                 attachedPorts = getPorts model dragProcess
               in
                 { model
                 | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updatePosition)
-                , portByID = portByID |> updateMulti (List.map .id attachedPorts) (Maybe.map updatePortPosition)
+                , jackByID = jackByID |> updateMulti (List.map .id attachedPorts) (Maybe.map updatePortPosition)
                 , drag = Nothing }
             DragPort dragPort ->
               let
-                updatePosition flowport =
-                  { flowport | position = getPortPosition model flowport }
+                updatePosition jack =
+                  { jack | position = getPortPosition model jack }
               in
                 { model
-                | portByID = portByID |> Dict.update dragPort.id (Maybe.map updatePosition)
+                | jackByID = jackByID |> Dict.update dragPort.id (Maybe.map updatePosition)
                 , drag = Nothing }
 
 
@@ -222,17 +223,20 @@ view model =
           ]
           []
 
-    drawPort : Port -> Svg Msg
-    drawPort flowport =
+    drawPort : Jack -> Svg Msg
+    drawPort jack =
       let
-        process = seize flowport.processID model.processByID
-        portPosition = getPortPosition model flowport
+        process = seize jack.processID model.processByID
+        jackPosition = getPortPosition model jack
       in
         circle
-          [ cx (portPosition.x |> toString)
-          , cy (portPosition.y |> toString)
+          [ cx (jackPosition.x |> toString)
+          , cy (jackPosition.y |> toString)
           , r "20"
-          , onMouseDown' <| DragPort flowport
+          , onMouseDown' <| DragPort jack
+          , Html.Attributes.style
+              [ "cursor" => "move"
+              ]
           ] []
     --drawLink : Model -> Flow -> Svg Msg
     --drawLink {processByID} {source, dest} =
@@ -256,7 +260,7 @@ view model =
       ]
       [
         Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
-      , Svg.g [] (model.portByID |> Dict.values |> List.map drawPort)
+      , Svg.g [] (model.jackByID |> Dict.values |> List.map drawPort)
       ]
 
 
@@ -291,7 +295,7 @@ getProcessPosition {drag} {id, position} =
 
 (/+/) p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
 
-getPortPosition : Model -> Port -> Position
+getPortPosition : Model -> Jack -> Position
 getPortPosition {drag, processByID} {id, position, processID} =
   let
     process = seize processID processByID
