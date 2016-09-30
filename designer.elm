@@ -77,6 +77,8 @@ type alias Resource =
   , state : MatterState
   }
 
+type alias Physical a = { a | shape : Shape , position : Position }
+
 type Shape = Rect Int Int
            | Chevron Int Int
            | Circle Int
@@ -157,16 +159,21 @@ init =
 
 -- UPDATE
 
-jacksCollide : Jack -> Jack -> Bool
-jacksCollide a b =
-  (log "dists" <| distanceSquared a.position b.position) < jackRadius * jackRadius
+shapesCollide : Physical a -> Physical a -> Bool
+shapesCollide a b =
+  case (a.shape, b.shape) of
+    ((Circle r1), (Circle r2)) ->
+      distanceSquared a.position b.position < r1 ^ 2 + r2 ^ 2
+    ((Circle r), (Rect w h)) ->
+      log "TODO" <| distanceSquared a.position b.position < Basics.min w h
+    _ -> Debug.crash "TODO"
 
 
 jackCollisions : Model -> Jack -> List Jack
 jackCollisions model jack =
   let
     jacks = Dict.values model.jackByID
-    hit = \j -> j.id /= jack.id && (jacksCollide jack j)
+    hit = \j -> j.id /= jack.id && (shapesCollide jack j)
   in
     List.filter hit jacks
 
