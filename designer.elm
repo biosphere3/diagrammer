@@ -81,7 +81,7 @@ type Shape = Rect Int Int
            | Chevron Int Int
            | Circle Int
 
-type Draggable = DragProcess Process | DragJack Jack
+type Draggable = DragProcess Process | DragJack Jack | DragContainer Container
 
 type MatterState = Solid | Liquid | Gas | Plasma
 
@@ -107,7 +107,7 @@ type alias Drag =
 
 mkProcess {name, position} = Process 0 name "" Nothing position (Rect 160 80)
 
-mkContainer {name, position} = Container 0 name position (Rect 160 80)
+mkContainer {name, position} = Container 0 name position (Rect 160 160)
 
 mkFlow {containerID, jackID, direction} = Flow containerID jackID direction
 
@@ -149,7 +149,7 @@ init =
       processByID
       jackByID
       Dict.empty --flowByID
-      Dict.empty --containerByID
+      containerByID
       --Dict.empty
       Nothing
      , Cmd.none )
@@ -193,7 +193,7 @@ joinJacks model jacks = model
 
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processByID, jackByID, drag} as model) =
+updateHelp msg ({processByID, jackByID, containerByID, drag} as model) =
   case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
@@ -211,6 +211,8 @@ updateHelp msg ({processByID, jackByID, drag} as model) =
               { process | position = getProcessPosition model process }
             updateJackPosition jack =
               { jack | position = getJackPosition model jack }
+            updateContainerPosition container =
+              { container | position = getContainerPosition model container }
           in case drag.target of
             DragProcess dragProcess ->
               let
@@ -220,6 +222,10 @@ updateHelp msg ({processByID, jackByID, drag} as model) =
                 | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updateProcessPosition)
                 , jackByID = jackByID |> updateMulti (List.map .id attachedJacks) (Maybe.map updateJackPosition)
                 }
+            DragContainer dragContainer ->
+              { model'
+              | containerByID = containerByID |> Dict.update dragContainer.id (Maybe.map updateContainerPosition)
+              }
             DragJack dragJack ->
               let
                 collisions = jackCollisions model (updateJackPosition dragJack)
@@ -290,13 +296,24 @@ view model =
       let
         backgroundColor = "cornflowerblue"
         realPosition = getProcessPosition model process
-        cx = realPosition.x
-        cy = realPosition.y
-        w = 150
-        h = floor(150 * 1.9)
       in
         drawShape process.shape realPosition
           [ onMouseDown' <| DragProcess process
+          , fill backgroundColor
+          , stroke "white"
+          , Html.Attributes.style
+              [ "cursor" => "move"
+              ]
+          ]
+
+    drawContainer : Container -> Svg Msg
+    drawContainer container =
+      let
+        backgroundColor = "orange"
+        realPosition = getContainerPosition model container
+      in
+        drawShape container.shape realPosition
+          [ onMouseDown' <| DragContainer container
           , fill backgroundColor
           , stroke "white"
           , Html.Attributes.style
@@ -337,6 +354,7 @@ view model =
       , height "100%"
       ]
       [ Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
+      , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
       , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
       ]
 
@@ -362,6 +380,24 @@ getProcessPosition {drag} {id, position} =
         case target of
           DragProcess dragProcess ->
             if dragProcess.id == id
+            then
+              Position
+                (position.x + current.x - start.x)
+                (position.y + current.y - start.y)
+            else
+              position
+          _ -> position
+
+getContainerPosition : Model -> Container -> Position
+getContainerPosition {drag} {id, position} =
+    case drag of
+      Nothing ->
+        position
+
+      Just {start, current, target} ->
+        case target of
+          DragContainer dragContainer ->
+            if dragContainer.id == id
             then
               Position
                 (position.x + current.x - start.x)
@@ -399,6 +435,7 @@ getJackPosition {drag, processByID} {id, position, processID} =
               if dragJack.id == id
               then position /+/ offset
               else position
+            _ -> position
 
 
 onMouseDown' : Draggable -> Attribute Msg
