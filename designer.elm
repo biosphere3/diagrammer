@@ -27,8 +27,8 @@ main =
 type alias Model =
   { processByID : ProcessDict
   , jackByID : JackDict
-  , flowByID : FlowDict
   , containerByID : ContainerDict
+  , flowByID : FlowDict
 
   -- ui
   , drag : Maybe Drag
@@ -106,6 +106,14 @@ type alias Drag =
   , target : Draggable
   }
 
+nextID : Dict comparable { a | id : ID } -> ID
+nextID dict =
+  dict
+  |> Dict.values
+  |> List.map .id
+  |> List.maximum
+  |> Maybe.withDefault 0
+  |> (+) 1
 
 mkProcess {name, position} = Process 0 name "" Nothing position (Rect 160 80)
 
@@ -138,9 +146,9 @@ init =
       , { name = "Biogas", processID = 2, direction = Output }
       ] |> (List.map (mkJack processByID)) |> toDictByID
 
-    --flowByID : FlowDict
-    --flowByID =
-    --  [] |> (List.map mkFlow) |> toDictByID
+    flowByID : FlowDict
+    flowByID = Dict.empty
+      --[] |> (List.map mkFlow) |> toDictByID
 
     containerByID : ContainerDict
     containerByID =
@@ -150,22 +158,21 @@ init =
     Model
       processByID
       jackByID
-      Dict.empty --flowByID
       containerByID
-      --Dict.empty
+      flowByID
       Nothing
      , Cmd.none )
 
 
 -- UPDATE
 
-shapesCollide : Physical a -> Physical a -> Bool
+shapesCollide : Physical a -> Physical b -> Bool
 shapesCollide a b =
   case (a.shape, b.shape) of
     ((Circle r1), (Circle r2)) ->
       distanceSquared a.position b.position < r1 ^ 2 + r2 ^ 2
     ((Circle r), (Rect w h)) ->
-      log "TODO" <| distanceSquared a.position b.position < Basics.min w h
+      distance a.position b.position < (toFloat <| Basics.min w h)
     _ -> Debug.crash "TODO"
 
 
@@ -176,6 +183,17 @@ jackCollisions model jack =
     hit = \j -> j.id /= jack.id && (shapesCollide jack j)
   in
     List.filter hit jacks
+
+jackContainerCollision : Model -> Jack -> Maybe Container
+jackContainerCollision model jack =
+  let
+    containers : List Container
+    containers = Dict.values model.containerByID
+
+    hit : Container -> Bool
+    hit = shapesCollide jack
+  in
+    List.head <| List.filter hit containers
 
 
 type Msg
@@ -200,7 +218,7 @@ joinJacks model jacks = model
 
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processByID, jackByID, containerByID, drag} as model) =
+updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model) =
   case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
@@ -235,15 +253,25 @@ updateHelp msg ({processByID, jackByID, containerByID, drag} as model) =
               }
             DragJack dragJack ->
               let
-                collisions = jackCollisions model (updateJackPosition dragJack)
+                jackHits = jackCollisions model (updateJackPosition dragJack)
+                containerHit = jackContainerCollision model (updateJackPosition dragJack)
               in
-                if List.length collisions > 0
-                then
-                  { model'
-                  | jackByID = jackByID |> Dict.update dragJack.id (Maybe.map updateJackPosition)
-                  }
-                else
-                  model'
+                case containerHit of
+                  Just container ->
+                    let
+                      nextFlowID = nextID flowByID
+                    in
+                      { model'
+                      | flowByID = (Dict.insert nextFlowID (Flow nextFlowID container.id dragJack.id InFlow) flowByID)
+                      }
+                  Nothing ->
+                    if List.length jackHits > 0
+                    then
+                      { model'
+                      | jackByID = jackByID |> Dict.update dragJack.id (Maybe.map updateJackPosition)
+                      }
+                    else
+                      model'
 
 
 
@@ -340,27 +368,32 @@ view model =
               ]
           ]
 
-    --drawLink : Model -> Flow -> Svg Msg
-    --drawLink {processByID} {source, dest} =
-    --  let
-    --    a = toString source.position.x
-    --    b = toString source.position.y
-    --    c = toString dest.position.x
-    --    d = toString dest.position.y
-    --  in
-    --    line
-    --      [ x1 a
-    --      , y1 b
-    --      , x2 c
-    --      , y2 d
-    --      , stroke "black" ]
-    --      []
+    drawFlow : Model -> Flow -> Svg Msg
+    drawFlow {containerByID, jackByID} {containerID, jackID, direction} =
+      let
+        container = seize containerID containerByID
+        jack = seize jackID jackByID
+        cx = toString container.position.x
+        cy = toString container.position.y
+        jx = toString jack.position.x
+        jy = toString jack.position.y
+      in
+        line
+          [ x1 cx
+          , y1 cy
+          , x2 jx
+          , y2 jy
+          , stroke "red"
+          , strokeWidth "3"
+          ]
+          []
   in
     Svg.svg
       [ width "100%"
       , height "100%"
       ]
-      [ Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
+      [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
+      , Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
       , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
       , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
       ]
@@ -448,3 +481,4 @@ getJackPosition {drag, processByID} {id, position, processID} =
 onMouseDown' : Draggable -> Attribute Msg
 onMouseDown' target =
   on "mousedown" (Json.map (DragStart target) Mouse.position)
+
