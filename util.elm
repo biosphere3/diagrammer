@@ -6,9 +6,15 @@ import Dict exposing (Dict)
 
 toDictByID : List { a | id : Int } -> Dict Int { a | id : Int }
 toDictByID seq =
-  seq
-  |> List.indexedMap (\i data -> (i, { data | id = i }))
-  |> Dict.fromList
+  let
+    f i data =
+      if data.id
+      then (data.id, data)
+      else (i, { data | id = i })
+  in
+    seq
+    |> List.indexedMap (\i data -> (i, { data | id = i }))
+    |> Dict.fromList
 
 seize : comparable -> Dict comparable b -> b
 seize v d =

@@ -115,20 +115,20 @@ nextID dict =
   |> Maybe.withDefault 0
   |> (+) 1
 
-mkProcess {name, position} = Process 0 name "" Nothing position (Rect 160 80)
+mkProcess id {name, position} = Process id name "" Nothing position (Rect 160 (160 + id))
 
-mkContainer {name, position} = Container 0 name position (Rect 160 160)
+mkContainer id {name, position} = Container id name position (Rect 160 160)
 
-mkFlow {containerID, jackID, direction} = Flow containerID jackID direction
+--mkFlow id {containerID, jackID, direction} = Flow containerID jackID direction
 
-mkJack processByID {name, processID, direction} =
+mkJack processByID id {name, processID, direction} =
   let
     process = case Dict.get processID processByID of
       Just process -> process
       Nothing -> (Debug.crash (toString processID))
     position = process.position /+/ Position 50 50
     shape = Circle jackRadius
-  in Jack 0 name processID 42.0 direction position shape
+  in Jack id name processID 42.0 direction position shape
 
 init : ( Model, Cmd Msg )
 init =
@@ -138,22 +138,22 @@ init =
       [ { name = "Biodigester", position = Position 100 100 }
       , { name = "Can of Beans", position = Position 300 400 }
       , { name = "Can of Beans", position = Position 500 200 }
-      ] |> (List.map mkProcess) |> toDictByID
+      ] |> (List.indexedMap mkProcess) |> toDictByID
 
     jackByID : JackDict
     jackByID =
       [ { name = "Effluent", processID = 1, direction = Input }
       , { name = "Biogas", processID = 2, direction = Output }
-      ] |> (List.map (mkJack processByID)) |> toDictByID
+      ] |> (List.indexedMap (mkJack processByID)) |> toDictByID
 
     flowByID : FlowDict
     flowByID = Dict.empty
-      --[] |> (List.map mkFlow) |> toDictByID
+      --[] |> (List.indexedMap mkFlow) |> toDictByID
 
     containerByID : ContainerDict
     containerByID =
       [ { name = "Rain Barrel", position = Position 100 600}
-      ] |> (List.map mkContainer) |> toDictByID
+      ] |> (List.indexedMap mkContainer) |> toDictByID
   in (
     Model
       processByID
@@ -297,6 +297,29 @@ subscriptions model =
 
 (=>) = (,)
 
+
+shapeAttrs : Shape -> Position -> List (Svg.Attribute Msg)
+shapeAttrs shape position =
+  case shape of
+    Rect w h ->
+      let
+        cx = position.x
+        cy = position.y
+      in
+        [ x (cx - w // 2 |> toString)
+        , y (cy - h // 2 |> toString)
+        , width (w |> toString)
+        , height (h |> toString)
+        ]
+    Circle radius ->
+      [ cx <| toString position.x
+      , cy <| toString position.y
+      , r <| toString radius
+      ]
+    Chevron width height ->
+      []
+
+
 drawShape : Shape -> Position -> List (Svg.Attribute Msg) -> Svg Msg
 drawShape shape position attrs =
   case shape of
@@ -323,6 +346,7 @@ drawShape shape position attrs =
       drawShape (Circle width) position attrs
 
 
+
 view : Model -> Html Msg
 view model =
   let
@@ -331,60 +355,76 @@ view model =
       let
         backgroundColor = "cornflowerblue"
         realPosition = getProcessPosition model process
-      in
-        drawShape process.shape realPosition
+        (w, h) = case process.shape of
+          Rect w h -> (w, h)
+          _ -> Debug.crash "never"
+
+        attrs =
           [ onMouseDown' <| DragProcess process
           , fill backgroundColor
           , stroke "white"
+          , rx "10"
+          , ry "10"
+          , xlinkHref <| "//placekitten.com/" ++ toString w ++ "/" ++ toString h
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
-          ]
+          ] ++ shapeAttrs process.shape realPosition
+      in
+        image attrs []
 
     drawContainer : Container -> Svg Msg
     drawContainer container =
       let
         backgroundColor = "orange"
         realPosition = getContainerPosition model container
-      in
-        drawShape container.shape realPosition
+        attrs =
           [ onMouseDown' <| DragContainer container
           , fill backgroundColor
           , stroke "white"
+          , xlinkHref "//placekitten.com/400"
           , Html.Attributes.style
               [ "cursor" => "move"
               ]
-          ]
+          ] ++ shapeAttrs container.shape realPosition
+      in
+        rect attrs []
 
     drawJack : Jack -> Svg Msg
     drawJack jack =
       let
         jackPosition = getJackPosition model jack
-      in
-        drawShape jack.shape jackPosition
+        attrs =
           [ onMouseDown' <| DragJack jack
           , Html.Attributes.style
               [ "cursor" => "move"
+              , "fill" => "white"
+              , "stroke" => "black"
+              , "strokeWidth" => "3"
               ]
-          ]
+          ] ++ shapeAttrs jack.shape jackPosition
+      in
+        circle attrs []
 
     drawFlow : Model -> Flow -> Svg Msg
     drawFlow {containerByID, jackByID} {containerID, jackID, direction} =
       let
         container = seize containerID containerByID
+        containerPosition = getContainerPosition model container
         jack = seize jackID jackByID
-        cx = toString container.position.x
-        cy = toString container.position.y
-        jx = toString jack.position.x
-        jy = toString jack.position.y
+        jackPosition = getJackPosition model jack
+        cx = toString containerPosition.x
+        cy = toString containerPosition.y
+        jx = toString jackPosition.x
+        jy = toString jackPosition.y
       in
         line
           [ x1 cx
           , y1 cy
           , x2 jx
           , y2 jy
-          , stroke "red"
-          , strokeWidth "3"
+          , stroke "black"
+          , strokeWidth "10"
           ]
           []
   in
