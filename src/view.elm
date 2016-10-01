@@ -11,8 +11,8 @@ import Svg.Attributes exposing (..)
 
 import Util exposing (..)
 import Model exposing (..)
+import Shape
 import State exposing (Msg(..))
-
 
 (=>) = (,)
 
@@ -100,17 +100,25 @@ view model =
     drawJack jack =
       let
         jackPosition = getJackPosition model jack
-        attrs =
-          [ onMouseDown' <| DragJack jack
-          , Html.Attributes.style
-              [ "cursor" => "move"
-              , "fill" => "white"
-              , "stroke" => "black"
-              , "strokeWidth" => "3"
-              ]
-          ] ++ shapeAttrs jack.shape jackPosition
+        x0 = toString <| jackPosition.x
+        y0 = toString <| jackPosition.y
+        outline =
+          Svg.path
+            [ onMouseDown' <| DragJack jack
+            , d <| Shape.chevron 100 50
+            , Html.Attributes.style
+                [ "cursor" => "move"
+                , "fill" => "white"
+                , "stroke" => "black"
+                , "strokeWidth" => "3"
+                ]
+            ] []
+        content = text'
+          [x "20", alignmentBaseline "middle"]
+          [text <| jack.name ]
       in
-        circle attrs []
+        g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
+          [ outline, content ]
 
     drawFlow : Model -> Flow -> Svg Msg
     drawFlow {containerByID, jackByID} {containerID, jackID, direction} =
@@ -119,10 +127,10 @@ view model =
         containerPosition = getContainerPosition model container
         jack = seize jackID jackByID
         jackPosition = getJackPosition model jack
-        cx = toString containerPosition.x
-        cy = toString containerPosition.y
-        jx = toString jackPosition.x
-        jy = toString jackPosition.y
+        cx = toString <| containerPosition.x
+        cy = toString <| containerPosition.y
+        jx = toString <| jackPosition.x + 50
+        jy = toString <| jackPosition.y
       in
         line
           [ x1 cx
