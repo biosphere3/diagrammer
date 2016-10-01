@@ -1,5 +1,7 @@
 module Util exposing (..)
 
+import Mouse exposing (Position)
+
 import Debug
 import Dict exposing (Dict)
 
@@ -29,3 +31,21 @@ updateMulti keys f dict =
     (\k d -> Dict.update k f d)
     dict
     keys
+
+
+px : Int -> String
+px number =
+  toString number ++ "px"
+
+-- VECTOR MATH ----------------------
+
+
+norm  p = p.x * p.x + p.y * p.y
+distanceSquared : Position -> Position -> Int
+distanceSquared p1 p2 = norm <| p1 /-/ p2
+distance p1 p2 = sqrt <| toFloat <| distanceSquared p1 p2
+
+
+
+(/+/) p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
+(/-/) p1 p2 = Position (p1.x - p2.x) (p1.y - p2.y)

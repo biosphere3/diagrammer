@@ -9,13 +9,26 @@
 - [X] draw jacks near processes
 
 - [X] drag and drop from jack to jack
-- [ ] render links
-- [ ] render containers
-  - [ ] shape (box?)
+- [ ] render flows
+  - [X] simple lines
+  - [ ] complex orthogonal path
+- [X] render containers
+  - [X] shape (box?)
   - [ ] content (name, capacity)
 
-- [ ] drag and drop from jack to container
+- [X] drag and drop from jack to container
 
+
+- [ ] reposition ports dynamically
+- [ ] animation
+
+- [ ] clean up
+  - [ ] split into files
+  - [ ] rethink the Shape impl (e.g. should be able to grab width/height from a Process)
+    - maybe all the visible elements and their records can live in a union type, and all the functions would have case statements
+
+
+- [ ] populate initial data from JSON
 
 
 ## Specs
