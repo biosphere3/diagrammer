@@ -60,20 +60,42 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
               in
                 case containerHit of
                   Just container ->
-                    let
-                      nextFlowID = nextID flowByID
-                    in
-                      { model'
-                      | flowByID = (Dict.insert nextFlowID (Flow nextFlowID container.id dragJack.id InFlow) flowByID)
-                      }
+                    fst <| addFlow (container, dragJack) model'
                   Nothing ->
                     if List.length jackHits > 0
                     then
-                      { model'
-                      | jackByID = jackByID |> Dict.update dragJack.id (Maybe.map updateJackPosition)
-                      }
+                      let
+                        jacks = (dragJack :: jackHits)
+                        newID = nextID model.containerByID
+                        newPos = centroid <| List.map .position jacks
+                        newContainer = Container newID "???" newPos (Rect 100 100)
+                        model'' =
+                          { model'
+                          | containerByID = Dict.insert newContainer.id newContainer containerByID
+                          }
+                        pairs : List (Container, Jack)
+                        pairs = List.map ((,) newContainer) jacks
+                        add : (Container, Jack) -> Model -> Model
+                        add x y = fst (addFlow x y)
+                        model''' = List.foldl
+                          add
+                          model''
+                          pairs
+                      in
+                        model'''
                     else
                       model'
+
+
+addFlow : (Container, Jack) -> Model -> (Model, Flow)
+addFlow (container, jack) model =
+  let
+    id = nextID model.flowByID
+    flow = (Flow id container.id jack.id)
+    flowByID' = Dict.insert flow.id flow model.flowByID
+    model' = { model | flowByID = flowByID' }
+  in
+    (model', flow)
 
 
 -- SUBSCRIPTIONS

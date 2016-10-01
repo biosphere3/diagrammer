@@ -121,7 +121,7 @@ view model =
           [ outline, content ]
 
     drawFlow : Model -> Flow -> Svg Msg
-    drawFlow {containerByID, jackByID} {containerID, jackID, direction} =
+    drawFlow {containerByID, jackByID} {containerID, jackID} =
       let
         container = seize containerID containerByID
         containerPosition = getContainerPosition model container

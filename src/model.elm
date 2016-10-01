@@ -48,7 +48,7 @@ type alias Flow =
   { id : ID
   , containerID : ID
   , jackID : ID
-  , direction : FlowDirection
+  --, direction : FlowDirection
   --, via : Resource
   }
 
