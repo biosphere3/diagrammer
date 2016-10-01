@@ -17,6 +17,7 @@ processes =
 jacks =
   [ { name = "Effluent", processID = 1, direction = Input }
   , { name = "Biogas", processID = 0, direction = Output }
+  , { name = "Poo", processID = 2, direction = Input }
   ]
 
 containers =

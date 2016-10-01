@@ -60,25 +60,28 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
               in
                 case containerHit of
                   Just container ->
-                    fst <| addFlow (container, dragJack) model'
+                    addFlow (container, dragJack) model'
                   Nothing ->
                     if List.length jackHits > 0
                     then
                       let
                         jacks = (dragJack :: jackHits)
-                        newID = nextID model.containerByID
-                        newPos = centroid <| List.map .position jacks
-                        newContainer = Container newID "???" newPos (Rect 100 100)
+                        newContainer =
+                          let
+                            newID = nextID model.containerByID
+                            newPos = centroid <| List.map .position jacks
+                            containerName = "(" ++ dragJack.name ++ ")"
+                          in Container newID containerName newPos (Rect 100 100)
+
                         model'' =
                           { model'
                           | containerByID = Dict.insert newContainer.id newContainer containerByID
                           }
                         pairs : List (Container, Jack)
                         pairs = List.map ((,) newContainer) jacks
-                        add : (Container, Jack) -> Model -> Model
-                        add x y = fst (addFlow x y)
+
                         model''' = List.foldl
-                          add
+                          addFlow
                           model''
                           pairs
                       in
@@ -87,8 +90,8 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                       model'
 
 
-addFlow : (Container, Jack) -> Model -> (Model, Flow)
-addFlow (container, jack) model =
+addFlow' : (Container, Jack) -> Model -> (Model, Flow)
+addFlow' (container, jack) model =
   let
     id = nextID model.flowByID
     flow = (Flow id container.id jack.id)
@@ -97,6 +100,8 @@ addFlow (container, jack) model =
   in
     (model', flow)
 
+addFlow : (Container, Jack) -> Model -> Model
+addFlow pair model = fst <| addFlow' pair model
 
 -- SUBSCRIPTIONS
 
