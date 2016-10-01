@@ -39,8 +39,35 @@ view model =
               [ "cursor" => "move"
               ]
           ] ++ shapeAttrs process.shape realPosition
+
+        headAttrs =
+          --[ x (toString <| realPosition.x - w // 2)
+          [ x (toString <| realPosition.x)
+          , y (toString <| realPosition.y - 90)
+          , width (toString w)
+          , height "40"
+          ]
+
+        textAttrs = headAttrs ++
+          [ fontSize "16px"
+          , textAnchor "middle"
+          ]
+
+        boxAttrs = headAttrs ++
+          [ stroke "black"
+          , fill "white"
+          , strokeWidth "2px"
+          ]
+
+        body = image attrs []
+        textBox = rect boxAttrs []
+        textContent = text' textAttrs [(text process.name)]
+        head = g [] [textContent]
       in
-        image attrs []
+        g []
+          [ head
+          , body ]
+
 
     drawContainer : Container -> Svg Msg
     drawContainer container =

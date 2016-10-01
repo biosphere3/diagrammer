@@ -23,7 +23,7 @@
 - [ ] animation
 
 - [ ] clean up
-  - [ ] split into files
+  - [X] split into files
   - [ ] rethink the Shape impl (e.g. should be able to grab width/height from a Process)
     - maybe all the visible elements and their records can live in a union type, and all the functions would have case statements
 

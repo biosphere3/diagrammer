@@ -15,14 +15,14 @@ init =
     processByID : ProcessDict
     processByID =
       [ { name = "Biodigester", position = Position 100 100 }
-      , { name = "Can of Beans", position = Position 300 400 }
-      , { name = "Can of Beans", position = Position 500 200 }
+      , { name = "Rainwater Catchment", position = Position 300 400 }
+      , { name = "Composting Toilet", position = Position 500 200 }
       ] |> (List.indexedMap mkProcess) |> toDictByID
 
     jackByID : JackDict
     jackByID =
       [ { name = "Effluent", processID = 1, direction = Input }
-      , { name = "Biogas", processID = 2, direction = Output }
+      , { name = "Biogas", processID = 0, direction = Output }
       ] |> (List.indexedMap (mkJack processByID)) |> toDictByID
 
     flowByID : FlowDict
