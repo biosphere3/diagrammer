@@ -8,22 +8,31 @@ import Model exposing (..)
 import State exposing (Msg(..))
 import Util exposing (..)
 
+processes =
+  [ { name = "Biodigester", position = Position 100 120 }
+  , { name = "Rainwater Catchment", position = Position 300 400 }
+  , { name = "Composting Toilet", position = Position 500 200 }
+  ]
+
+jacks =
+  [ { name = "Effluent", processID = 1, direction = Input }
+  , { name = "Biogas", processID = 0, direction = Output }
+  ]
+
+containers =
+  [ { name = "Rain Barrel", position = Position 100 600}
+  ]
 
 init : ( Model, Cmd Msg )
 init =
   let
     processByID : ProcessDict
     processByID =
-      [ { name = "Biodigester", position = Position 100 100 }
-      , { name = "Rainwater Catchment", position = Position 300 400 }
-      , { name = "Composting Toilet", position = Position 500 200 }
-      ] |> (List.indexedMap mkProcess) |> toDictByID
+      processes |> (List.indexedMap mkProcess) |> toDictByID
 
     jackByID : JackDict
     jackByID =
-      [ { name = "Effluent", processID = 1, direction = Input }
-      , { name = "Biogas", processID = 0, direction = Output }
-      ] |> (List.indexedMap (mkJack processByID)) |> toDictByID
+      jacks |> (List.indexedMap (mkJack processByID)) |> toDictByID
 
     flowByID : FlowDict
     flowByID = Dict.empty
@@ -31,8 +40,7 @@ init =
 
     containerByID : ContainerDict
     containerByID =
-      [ { name = "Rain Barrel", position = Position 100 600}
-      ] |> (List.indexedMap mkContainer) |> toDictByID
+      containers |> (List.indexedMap mkContainer) |> toDictByID
   in (
     Model
       processByID
@@ -52,9 +60,16 @@ mkContainer id {name, position} = Container id name position (Rect 160 160)
 
 mkJack processByID id {name, processID, direction} =
   let
-    process = case Dict.get processID processByID of
-      Just process -> process
-      Nothing -> (Debug.crash (toString processID))
+    process = seize processID processByID
     position = process.position /+/ Position 100 50
     shape = Circle jackRadius
-  in Jack id name processID 42.0 direction position shape
+  --in Jack id name processID 42.0 direction position shape
+  in
+    { id = id
+    , name = name
+    , processID = processID
+    , rate = 42.0
+    , direction = direction
+    , position = position
+    , shape = shape
+    }

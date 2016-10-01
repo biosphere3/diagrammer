@@ -64,6 +64,16 @@ type alias Resource =
   , state : MatterState
   }
 
+type alias Jack =
+  { id : ID
+  , name : String
+  , processID : ID
+  , rate : Float
+  , direction : JackDirection
+  , position : Position
+  , shape : Shape
+  }
+
 type alias Physical a = { a | shape : Shape , position : Position }
 
 type Shape = Rect Int Int
@@ -76,16 +86,6 @@ type MatterState = Solid | Liquid | Gas | Plasma
 
 type JackDirection = Input | Output
 type FlowDirection = InFlow | OutFlow
-
-type alias Jack =
-  { id : ID
-  , name : String
-  , processID : ID
-  , rate : Float
-  , direction : JackDirection
-  , position : Position
-  , shape : Shape
-  }
 
 getProcessPosition : Model -> Process -> Position
 getProcessPosition {drag} {id, position} =

@@ -49,7 +49,7 @@ view model =
           ]
 
         textAttrs = headAttrs ++
-          [ fontSize "16px"
+          [ fontSize "20px"
           , textAnchor "middle"
           ]
 
@@ -83,8 +83,18 @@ view model =
               [ "cursor" => "move"
               ]
           ] ++ shapeAttrs container.shape realPosition
+
+        textAttrs =
+          [ fontSize "20px"
+          , x (toString realPosition.x)
+          , y (toString realPosition.y)
+          , textAnchor "middle"
+          ]
       in
-        rect attrs []
+        g []
+          [ rect attrs []
+          , text' textAttrs [text container.name]
+          ]
 
     drawJack : Jack -> Svg Msg
     drawJack jack =
