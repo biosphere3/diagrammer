@@ -1,6 +1,7 @@
 module State exposing (..)
 
-import Mouse exposing (Position)
+import Math.Vector2 exposing (..)
+import Mouse
 
 import Dict exposing (..)
 import Model exposing (..)
@@ -8,9 +9,9 @@ import Util exposing (..)
 
 
 type Msg
-    = DragStart Draggable Position
-    | DragAt Position
-    | DragEnd Position
+    = DragStart Draggable Mouse.Position
+    | DragAt Mouse.Position
+    | DragEnd Mouse.Position
 
 
 
@@ -136,7 +137,7 @@ shapesCollide a b =
     ((Circle r1), (Circle r2)) ->
       distanceSquared a.position b.position < r1 ^ 2 + r2 ^ 2
     ((Circle r), (Rect w h)) ->
-      distance a.position b.position < (toFloat <| Basics.min w h)
+      distance a.position b.position < (Basics.min w h)
     _ -> Debug.crash "TODO"
 
 

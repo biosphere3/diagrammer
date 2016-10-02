@@ -1,5 +1,6 @@
 module Util exposing (..)
 
+import Math.Vector2 exposing (..)
 import Mouse exposing (Position)
 
 import Debug
@@ -17,6 +18,7 @@ toDictByID seq =
     seq
     |> List.indexedMap (\i data -> (i, { data | id = i }))
     |> Dict.fromList
+
 
 seize : comparable -> Dict comparable b -> b
 seize v d =
@@ -40,18 +42,9 @@ px number =
 -- VECTOR MATH ----------------------
 
 
-norm  p = p.x * p.x + p.y * p.y
-distanceSquared : Position -> Position -> Int
-distanceSquared p1 p2 = norm <| p1 /-/ p2
-distance p1 p2 = sqrt <| toFloat <| distanceSquared p1 p2
-
 centroid ps =
   let
-    xs = List.sum <| List.map .x ps
-    ys = List.sum <| List.map .y ps
-    n = List.length ps
+    sum = List.foldl add (vec2 0 0) ps
+    n = toFloat <| List.length ps
   in
-    Position (xs // n) (ys // n)
-
-(/+/) p1 p2 = Position (p1.x + p2.x) (p1.y + p2.y)
-(/-/) p1 p2 = Position (p1.x - p2.x) (p1.y - p2.y)
+    scale (1.0 / n) sum

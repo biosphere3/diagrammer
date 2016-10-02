@@ -5,7 +5,8 @@ import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on, onMouseEnter, onMouseLeave)
 import Json.Decode as Json exposing ((:=))
-import Mouse exposing (Position)
+import Math.Vector2 exposing (..)
+import Mouse
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
@@ -42,8 +43,8 @@ view model =
 
         headAttrs =
           --[ x (toString <| realPosition.x - w // 2)
-          [ x (toString <| realPosition.x)
-          , y (toString <| realPosition.y - 90)
+          [ x (toString <| (getX realPosition))
+          , y (toString <| (getY realPosition) - 90)
           , width (toString w)
           , height "40"
           ]
@@ -86,8 +87,8 @@ view model =
 
         textAttrs =
           [ fontSize "20px"
-          , x (toString realPosition.x)
-          , y (toString realPosition.y)
+          , x (toString <| getX realPosition)
+          , y (toString <| getY realPosition)
           , textAnchor "middle"
           ]
       in
@@ -99,9 +100,9 @@ view model =
     drawJack : Jack -> Svg Msg
     drawJack jack =
       let
-        jackPosition = getJackPosition model jack
-        x0 = toString <| jackPosition.x
-        y0 = toString <| jackPosition.y
+        jackCoords = toRecord <| getJackPosition model jack
+        x0 = toString <| jackCoords.x
+        y0 = toString <| jackCoords.y
         outline =
           Svg.path
             [ onMouseDown' <| DragJack jack
@@ -124,13 +125,13 @@ view model =
     drawFlow {containerByID, jackByID} {containerID, jackID} =
       let
         container = seize containerID containerByID
-        containerPosition = getContainerPosition model container
+        containerCoords = toRecord <| getContainerPosition model container
         jack = seize jackID jackByID
-        jackPosition = getJackPosition model jack
-        cx = toString <| containerPosition.x
-        cy = toString <| containerPosition.y
-        jx = toString <| jackPosition.x + 50
-        jy = toString <| jackPosition.y
+        jackCoords = toRecord <| getJackPosition model jack
+        cx = toString <| containerCoords.x
+        cy = toString <| containerCoords.y
+        jx = toString <| jackCoords.x + 50
+        jy = toString <| jackCoords.y
       in
         line
           [ x1 cx
@@ -155,54 +156,25 @@ view model =
 
 
 
-shapeAttrs : Shape -> Position -> List (Svg.Attribute Msg)
+shapeAttrs : Shape -> Vec2 -> List (Svg.Attribute Msg)
 shapeAttrs shape position =
   case shape of
     Rect w h ->
       let
-        cx = position.x
-        cy = position.y
+        pos = position `sub` (vec2 (w / 2) (h / 2))
       in
-        [ x (cx - w // 2 |> toString)
-        , y (cy - h // 2 |> toString)
+        [ x ((getX pos) |> toString)
+        , y ((getY pos) |> toString)
         , width (w |> toString)
         , height (h |> toString)
         ]
     Circle radius ->
-      [ cx <| toString position.x
-      , cy <| toString position.y
+      [ cx <| toString (getX position)
+      , cy <| toString (getY position)
       , r <| toString radius
       ]
     Chevron width height ->
       []
-
-
-drawShape : Shape -> Position -> List (Svg.Attribute Msg) -> Svg Msg
-drawShape shape position attrs =
-  case shape of
-    Rect w h ->
-      let
-        cx = position.x
-        cy = position.y
-      in
-        rect
-        ( [ x (cx - w // 2 |> toString)
-          , y (cy - h // 2 |> toString)
-          , width (w |> toString)
-          , height (h |> toString)
-          ] ++ attrs )
-          []
-    Circle radius ->
-      circle
-      ( [ cx <| toString position.x
-        , cy <| toString position.y
-        , r <| toString radius
-        ] ++ attrs )
-        []
-    Chevron width height ->
-      drawShape (Circle width) position attrs
-
-
 
 
 onMouseDown' : Draggable -> Attribute Msg

@@ -2,16 +2,16 @@ module Init exposing (..)
 
 
 import Dict exposing (Dict)
-import Mouse exposing (Position)
+import Math.Vector2 exposing (..)
 
 import Model exposing (..)
 import State exposing (Msg(..))
 import Util exposing (..)
 
 processes =
-  [ { name = "Biodigester", position = Position 100 120 }
-  , { name = "Rainwater Catchment", position = Position 300 400 }
-  , { name = "Composting Toilet", position = Position 500 200 }
+  [ { name = "Biodigester", position = vec2 100 120 }
+  , { name = "Rainwater Catchment", position = vec2 300 400 }
+  , { name = "Composting Toilet", position = vec2 500 200 }
   ]
 
 jacks =
@@ -21,7 +21,7 @@ jacks =
   ]
 
 containers =
-  [ { name = "Rain Barrel", position = Position 100 600}
+  [ { name = "Rain Barrel", position = vec2 100 600}
   ]
 
 init : ( Model, Cmd Msg )
@@ -62,7 +62,7 @@ mkContainer id {name, position} = Container id name position (Rect 160 160)
 mkJack processByID id {name, processID, direction} =
   let
     process = seize processID processByID
-    position = process.position /+/ Position 100 50
+    position = process.position `add` vec2 100 50
     shape = Circle jackRadius
   --in Jack id name processID 42.0 direction position shape
   in
