@@ -1,4 +1,4 @@
-module View exposing (..)
+module View.ViewField exposing (..)
 
 import Dict exposing (Dict)
 import Html exposing (Html)
@@ -152,8 +152,6 @@ view model =
       , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
       , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
       ]
-
-
 
 
 shapeAttrs : Shape -> Vec2 -> List (Svg.Attribute Msg)
