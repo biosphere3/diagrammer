@@ -47,12 +47,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                 {globalTransform} = model
                 {translate, scale} = globalTransform
               in
-                { model
-                | globalTransform =
-                  { globalTransform
-                  | translate = translate `add` dragOffset drag
-                  }
-                }
+                updateGlobalTransformTranslate (add (dragOffset drag)) model'
             DragProcess dragProcess ->
               let
                 attachedJacks = getJacks model dragProcess
@@ -123,11 +118,12 @@ subscriptions model =
   let
     dragging =
       case model.drag of
-        Nothing ->
-          Sub.none
+        Nothing -> Sub.batch
+          [ Mouse.downs (DragStart DragScreen) ]
 
-        Just _ ->
-          Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
+        Just _ -> Sub.batch
+          [ Mouse.moves DragAt
+          , Mouse.ups DragEnd ]
   in
     Sub.batch [ dragging ]
 

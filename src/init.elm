@@ -55,9 +55,8 @@ init =
     )
 
 
-
 mkProcess : ID -> { a | name : String, position : Vec2 }  -> Process
-mkProcess id {name, position} = Process id name "" Nothing position (Rect 160 (160 + id))
+mkProcess id {name, position} = Process id name "" Nothing position (Rect 160 (160 + (toFloat id)))
 
 mkContainer : ID -> { a | name : String, position : Vec2 }  -> Container
 mkContainer id {name, position} = Container id name position (Rect 160 160)

@@ -142,15 +142,20 @@ view model =
           , strokeWidth "25"
           ]
           []
+
+    (gx, gy) = toTuple <| .translate <| getGlobalTransform model
   in
     Svg.svg
       [ width "100%"
       , height "100%"
       ]
-      [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
-      , Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
-      , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
-      , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
+      [ Svg.g
+        [ transform <| "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"]
+        [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
+        , Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
+        , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
+        , Svg.g [] (model.jackByID |> Dict.values |> List.map drawJack)
+        ]
       ]
 
 

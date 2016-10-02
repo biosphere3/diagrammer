@@ -14,9 +14,10 @@ type alias Model =
 
   -- ui
   , drag : Maybe Drag
-  , globalTransform : { translate : Vec2, scale : Float }
+  , globalTransform : Transform
   }
 
+type alias Transform = { translate : Vec2, scale : Float }
 
 type alias ID = Int
 
@@ -142,6 +143,29 @@ getJackPosition {drag, processByID} {id, position, processID} =
               then position `add` offset
               else position
             _ -> position
+
+
+getGlobalTransform : Model -> Transform
+getGlobalTransform ({drag, globalTransform} as model) =
+  case drag of
+    Nothing -> model.globalTransform
+    Just ({target} as drag) ->
+      case target of
+        DragScreen ->
+          updateGlobalTransformTranslate (add <| dragOffset drag) model
+          |> .globalTransform
+        _ -> model.globalTransform
+
+
+updateGlobalTransformTranslate : (Vec2 -> Vec2) -> Model -> Model
+updateGlobalTransformTranslate fn ({globalTransform} as model) =
+  { model
+  | globalTransform =
+    { globalTransform
+    | translate = fn globalTransform.translate
+    }
+  }
+
 
 
 -- helpers ------------------------------------------
