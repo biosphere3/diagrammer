@@ -42,6 +42,17 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
             updateContainerPosition container =
               { container | position = getContainerPosition model container }
           in case drag.target of
+            DragScreen ->
+              let
+                {globalTransform} = model
+                {translate, scale} = globalTransform
+              in
+                { model
+                | globalTransform =
+                  { globalTransform
+                  | translate = translate `add` dragOffset drag
+                  }
+                }
             DragProcess dragProcess ->
               let
                 attachedJacks = getJacks model dragProcess

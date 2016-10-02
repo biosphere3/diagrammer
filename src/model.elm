@@ -14,6 +14,7 @@ type alias Model =
 
   -- ui
   , drag : Maybe Drag
+  , globalTransform : { translate : Vec2, scale : Float }
   }
 
 
