@@ -63,7 +63,7 @@ mkJack processByID id {name, processID, direction} =
   let
     process = seize processID processByID
     position = process.position `add` vec2 100 50
-    shape = Circle jackRadius
+    shape = Circle 29
   --in Jack id name processID 42.0 direction position shape
   in
     { id = id

@@ -19,22 +19,10 @@ type alias Model =
 
 type alias ID = Int
 
-type alias Drag =
-  { start : Mouse.Position
-  , current : Mouse.Position
-  , target : Draggable
-  }
-
 type alias ProcessDict = Dict ID Process
 type alias JackDict = Dict ID Jack
 type alias FlowDict = Dict ID Flow
 type alias ContainerDict = Dict ID Container
-
---type alias Positioned a =
---  { a | position : Vec2
---  }
-
-jackRadius = 20
 
 type alias Process =
     { id : ID
@@ -81,7 +69,16 @@ type Shape = Rect Float Float
            | Chevron Float Float
            | Circle Float
 
-type Draggable = DragProcess Process | DragJack Jack | DragContainer Container
+type alias Drag =
+  { start : Mouse.Position
+  , current : Mouse.Position
+  , target : Draggable
+  }
+
+type Draggable = DragProcess Process
+               | DragJack Jack
+               | DragContainer Container
+               | DragScreen
 
 type MatterState = Solid | Liquid | Gas | Plasma
 
