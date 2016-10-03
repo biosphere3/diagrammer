@@ -11,17 +11,17 @@ import Util exposing (..)
 processes =
   [ { name = "Biodigester", position = vec2 100 120 }
   , { name = "Rainwater Catchment", position = vec2 300 400 }
-  , { name = "Composting Toilet", position = vec2 500 200 }
+  , { name = "Human", position = vec2 500 200 }
   ]
 
 jacks =
-  [ { name = "Effluent", processID = 1, direction = Input }
-  , { name = "Biogas", processID = 0, direction = Output }
-  , { name = "Poo", processID = 2, direction = Input }
+  [ { name = "Compost", processID = 1, direction = Input }
+  , { name = "Water", processID = 0, direction = Output }
+  , { name = "Food", processID = 2, direction = Input }
   ]
 
 containers =
-  [ { name = "Rain Barrel", position = vec2 100 600}
+  [ { name = "Barrel", position = vec2 100 600}
   ]
 
 init : ( Model, Cmd Msg )
