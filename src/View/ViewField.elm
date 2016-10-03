@@ -170,13 +170,16 @@ drawFlow ({containerByID, jackByID} as model) flow =
 
     flowText =
       text'
-        [ textAnchor "middle"
+        [ alignmentBaseline "bottom"
+        , fill "white"
+        , fontSize "20px"
+        , dy "5"
         ]
         [ textPath
           [ xlinkHref <| "#" ++ domID
-          , stroke "white"
+          , startOffset <| toString flow.textOffset
           ]
-          [ text <| jack.name
+          [ text <| String.join " • • • " <| repeat 100 jack.name
           ]
         ]
 

@@ -2,6 +2,7 @@ module State exposing (..)
 
 import Math.Vector2 exposing (..)
 import Mouse
+import Time exposing (..)
 
 import Dict exposing (..)
 import Model exposing (..)
@@ -13,6 +14,7 @@ type Msg
     | DragAt Mouse.Position
     | DragEnd Mouse.Position
     | MouseWheelTurn Mouse.Position (Int, Int) Float
+    | Tick Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -110,12 +112,24 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
           }
         }
 
+    Tick t ->
+      let
+        u _ flow = { flow | textOffset = flow.textOffset + 1 }
+        flowByID' = flowByID |> Dict.map u
+      in
+        { model | flowByID = flowByID' }
+
 
 addFlow' : (Container, Jack) -> Model -> (Model, Flow)
 addFlow' (container, jack) model =
   let
     id = nextID model.flowByID
-    flow = (Flow id container.id jack.id)
+    flow =
+      { id = id
+      , containerID = container.id
+      , jackID = jack.id
+      , textOffset = -2000
+      }
     flowByID' = Dict.insert flow.id flow model.flowByID
     model' = { model | flowByID = flowByID' }
   in
@@ -138,8 +152,9 @@ subscriptions model =
         Just _ -> Sub.batch
           [ Mouse.moves DragAt
           , Mouse.ups DragEnd ]
+    ticking = every (100 * millisecond) Tick
   in
-    Sub.batch [ dragging ]
+    Sub.batch [ dragging, ticking ]
 
 
 nextID : Dict comparable { a | id : ID } -> ID

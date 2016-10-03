@@ -41,6 +41,7 @@ type alias Flow =
   , jackID : ID
   --, direction : FlowDirection
   --, via : Resource
+  , textOffset : Float
   }
 
 type alias Container =

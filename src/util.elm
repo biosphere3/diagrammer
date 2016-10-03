@@ -39,6 +39,17 @@ px : Int -> String
 px number =
   toString number ++ "px"
 
+repeat : Int -> a -> List a
+repeat n v =
+  let
+    r : List a -> (Int, a) -> List a
+    r vs (n, v) =
+      if n == 0
+      then vs
+      else r (v :: vs) (n - 1, v)
+  in
+    r [] (n, v)
+
 -- VECTOR MATH ----------------------
 
 
