@@ -12,7 +12,7 @@ type Msg
     = DragStart Draggable Mouse.Position
     | DragAt Mouse.Position
     | DragEnd Mouse.Position
-
+    | MouseWheelTurn Mouse.Position (Int, Int) Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -95,6 +95,20 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                         model'''
                     else
                       model'
+
+    MouseWheelTurn position (width, height) delta ->
+      let
+        ratio = Debug.log "delta" <| 1 + delta / 100
+        {globalTransform} = model
+        {translate, scale} = globalTransform
+      in
+        { model
+        | globalTransform =
+          { globalTransform
+          | scale = scale * ratio
+          , translate = translate
+          }
+        }
 
 
 addFlow' : (Container, Jack) -> Model -> (Model, Flow)

@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on, onMouseEnter, onMouseLeave)
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json exposing (..)
 import Math.Vector2 exposing (..)
 import Mouse
 import Svg exposing (..)
@@ -143,14 +143,18 @@ view model =
           ]
           []
 
-    (gx, gy) = toTuple <| .translate <| getGlobalTransform model
+    xf = getGlobalTransform model
+    (gx, gy) = toTuple <| .translate <| xf
+    scale = .scale <| xf
   in
     Svg.svg
       [ width "100%"
       , height "100%"
+      , onMouseWheel'
       ]
       [ Svg.g
-        [ transform <| "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"]
+        [ transform <| " scale(" ++ (toString scale) ++ ")" ++ "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"
+        ]
         [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
         , Svg.g [] (model.processByID |> Dict.values |> List.map drawProcess)
         , Svg.g [] (model.containerByID |> Dict.values |> List.map drawContainer)
@@ -183,4 +187,17 @@ shapeAttrs shape position =
 onMouseDown' : Draggable -> Attribute Msg
 onMouseDown' target =
   on "mousedown" (Json.map (DragStart target) Mouse.position)
+
+
+onMouseWheel' : Attribute Msg
+onMouseWheel' =
+  let
+    makeMouseWheelMsg : Int -> Int -> Float -> (Int, Int) -> Msg
+    makeMouseWheelMsg clientX clientY deltaY dimensions =
+      MouseWheelTurn (Mouse.Position clientX clientY) dimensions deltaY
+    targetDecoder = object2 (,) ("width" := int) ("height" := int)
+    decoder : Json.Decoder Msg
+    decoder = object4 makeMouseWheelMsg ("clientX" := int) ("clientY" := int) ("deltaY" := float) ("target" := targetDecoder)
+  in
+    on "wheel" decoder
 

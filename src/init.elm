@@ -49,7 +49,7 @@ init =
       , containerByID = containerByID
       , flowByID = flowByID
       , drag = Nothing
-      , globalTransform = { translate = vec2 0 0, scale = 0}
+      , globalTransform = { translate = vec2 0 0, scale = 1.0}
       }
       , Cmd.none
     )
