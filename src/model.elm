@@ -121,6 +121,11 @@ getContainerPosition {drag} {id, position} =
           _ -> position
 
 
+getJackProcess : Model -> Jack -> Process
+getJackProcess model jack =
+  seize jack.processID model.processByID
+
+
 getJackPosition : Model -> Jack -> Vec2
 getJackPosition {drag, processByID} {id, position, processID} =
   let

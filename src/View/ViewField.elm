@@ -23,6 +23,8 @@ view model =
     xf = getGlobalTransform model
     (gx, gy) = toTuple <| .translate <| xf
     scale = .scale <| xf
+
+    looseJacks = model.jackByID |> Dict.values |> List.filter (not << isConnected model)
   in
     Svg.svg
       [ width "100%"
@@ -35,7 +37,7 @@ view model =
         [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
         , Svg.g [] (model.processByID |> Dict.values |> List.map (drawProcess model))
         , Svg.g [] (model.containerByID |> Dict.values |> List.map (drawContainer model))
-        , Svg.g [] (model.jackByID |> Dict.values |> List.map (drawJack model))
+        , Svg.g [] (looseJacks |> List.map (drawJack model))
         ]
       ]
 
@@ -145,13 +147,14 @@ drawFlow : Model -> Flow -> Svg Msg
 drawFlow ({containerByID, jackByID} as model) {containerID, jackID} =
   let
     container = seize containerID containerByID
-    containerCoords = toRecord <| getContainerPosition model container
     jack = seize jackID jackByID
-    jackCoords = toRecord <| getJackPosition model jack
+    process = getJackProcess model jack
+    containerCoords = toRecord <| getContainerPosition model container
+    processCoords = toRecord <| getProcessPosition model process
     cx = toString <| containerCoords.x
     cy = toString <| containerCoords.y
-    jx = toString <| jackCoords.x + 50
-    jy = toString <| jackCoords.y
+    jx = toString <| processCoords.x
+    jy = toString <| processCoords.y
   in
     line
       [ x1 cx
@@ -163,6 +166,15 @@ drawFlow ({containerByID, jackByID} as model) {containerID, jackID} =
       ]
       []
 
+
+isConnected : Model -> Jack -> Bool
+isConnected model jack =
+  let
+    flow = model.flowByID |> Dict.values |> List.filter (\{jackID} -> jack.id == jackID) |> List.head
+  in
+    case flow of
+      Just _ -> True
+      Nothing -> False
 
 shapeAttrs : Shape -> Vec2 -> List (Svg.Attribute Msg)
 shapeAttrs shape position =
