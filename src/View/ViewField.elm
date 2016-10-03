@@ -7,6 +7,7 @@ import Html.Events exposing (on, onMouseEnter, onMouseLeave)
 import Json.Decode as Json exposing (..)
 import Math.Vector2 exposing (..)
 import Mouse
+import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
@@ -144,10 +145,10 @@ drawJack model jack =
       [ outline, content ]
 
 drawFlow : Model -> Flow -> Svg Msg
-drawFlow ({containerByID, jackByID} as model) {containerID, jackID} =
+drawFlow ({containerByID, jackByID} as model) flow =
   let
-    container = seize containerID containerByID
-    jack = seize jackID jackByID
+    container = seize flow.containerID containerByID
+    jack = seize flow.jackID jackByID
     process = getJackProcess model jack
     containerCoords = toRecord <| getContainerPosition model container
     processCoords = toRecord <| getProcessPosition model process
@@ -155,16 +156,36 @@ drawFlow ({containerByID, jackByID} as model) {containerID, jackID} =
     cy = toString <| containerCoords.y
     jx = toString <| processCoords.x
     jy = toString <| processCoords.y
+
+    domID = "flow-" ++ (toString flow.id)
+    dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
+    flowLine =
+      Svg.path
+        [ d dval
+        , stroke "black"
+        , strokeWidth "25"
+        , id domID
+        ]
+        []
+
+    flowText =
+      text'
+        [ textAnchor "middle"
+        ]
+        [ textPath
+          [ xlinkHref <| "#" ++ domID
+          , stroke "white"
+          ]
+          [ text <| jack.name
+          ]
+        ]
+
+
   in
-    line
-      [ x1 cx
-      , y1 cy
-      , x2 jx
-      , y2 jy
-      , stroke "black"
-      , strokeWidth "25"
+    g []
+      [ flowLine
+      , flowText
       ]
-      []
 
 
 isConnected : Model -> Jack -> Bool
