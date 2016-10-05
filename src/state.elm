@@ -169,8 +169,8 @@ nextID dict =
   |> (+) 1
 
 
-shapesCollide : Physical a -> Physical b -> Bool
-shapesCollide a b =
+rectsCollide : Physical a -> Physical b -> Bool
+rectsCollide a b =
   let
     (w1, h1) = a.rect
     (w2, h2) = b.rect
@@ -184,7 +184,7 @@ jackCollisions : Model -> Jack -> List Jack
 jackCollisions model jack =
   let
     jacks = Dict.values model.jackByID
-    hit = \j -> j.id /= jack.id && (shapesCollide jack j)
+    hit = \j -> j.id /= jack.id && (rectsCollide jack j)
   in
     List.filter hit jacks
 
@@ -195,7 +195,7 @@ jackContainerCollision model jack =
     containers = Dict.values model.containerByID
 
     hit : Container -> Bool
-    hit = shapesCollide jack
+    hit = rectsCollide jack
   in
     List.head <| List.filter hit containers
 

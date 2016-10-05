@@ -60,7 +60,7 @@ drawProcess model process =
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
-      ] ++ shapeAttrs process.rect realPosition
+      ] ++ rectAttrs process.rect realPosition
 
     headAttrs =
       --[ x (toString <| realPosition.x - w // 2)
@@ -104,7 +104,7 @@ drawContainer model container =
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
-      ] ++ shapeAttrs container.rect realPosition
+      ] ++ rectAttrs container.rect realPosition
 
     textAttrs =
       [ fontSize "20px"
@@ -199,8 +199,8 @@ isConnected model jack =
       Just _ -> True
       Nothing -> False
 
-shapeAttrs : Rect -> Vec2 -> List (Svg.Attribute Msg)
-shapeAttrs (w, h) position =
+rectAttrs : Rect -> Vec2 -> List (Svg.Attribute Msg)
+rectAttrs (w, h) position =
   let
     pos = position `sub` (vec2 (w / 2) (h / 2))
   in
