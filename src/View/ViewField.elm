@@ -173,13 +173,14 @@ drawFlow ({containerByID, jackByID} as model) flow =
         [ alignmentBaseline "bottom"
         , fill "white"
         , fontSize "20px"
+        , fontFamily "Helvetica Neue, sans-serif"
         , dy "5"
         ]
         [ textPath
           [ xlinkHref <| "#" ++ domID
           , startOffset <| toString flow.textOffset
           ]
-          [ text <| String.join " • • • " <| repeat 100 jack.name
+          [ text <| String.join " (2kg/day) › › › › › " <| repeat 100 (String.toUpper jack.name)
           ]
         ]
 

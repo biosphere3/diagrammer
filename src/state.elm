@@ -9,6 +9,8 @@ import Model exposing (..)
 import Util exposing (..)
 
 
+textOffsetRate = 1.5
+
 type Msg
     = DragStart Draggable Mouse.Position
     | DragAt Mouse.Position
@@ -114,7 +116,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
 
     Tick t ->
       let
-        u _ flow = { flow | textOffset = flow.textOffset + 1 }
+        u _ flow = { flow | textOffset = flow.textOffset + textOffsetRate }
         flowByID' = flowByID |> Dict.map u
       in
         { model | flowByID = flowByID' }
