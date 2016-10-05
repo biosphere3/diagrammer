@@ -2,8 +2,10 @@ module Shape exposing (..)
 
 import String
 
-chevron : Float -> Float -> String
-chevron width height =
+jackDimensions = (100, 50)
+
+chevron : (Float, Float) -> String
+chevron (width, height) =
   let
     angle = degrees 60
     dy = height / 2

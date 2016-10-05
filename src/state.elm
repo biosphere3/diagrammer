@@ -82,7 +82,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                             newID = nextID model.containerByID
                             newPos = centroid <| List.map .position jacks
                             containerName = "(" ++ dragJack.name ++ ")"
-                          in Container newID containerName newPos (Rect 100 100)
+                          in Container newID containerName newPos (100, 100)
 
                         model'' =
                           { model'
@@ -171,12 +171,13 @@ nextID dict =
 
 shapesCollide : Physical a -> Physical b -> Bool
 shapesCollide a b =
-  case (a.shape, b.shape) of
-    ((Circle r1), (Circle r2)) ->
-      distanceSquared a.position b.position < r1 ^ 2 + r2 ^ 2
-    ((Circle r), (Rect w h)) ->
-      distance a.position b.position < (Basics.min w h)
-    _ -> Debug.crash "TODO"
+  let
+    (w1, h1) = a.rect
+    (w2, h2) = b.rect
+    d = a.position `sub` b.position
+    (dx, dy) = toTuple d
+  in
+    abs dx < (w1 + w2) / 2 && abs dy < (h1 + h2) / 2
 
 
 jackCollisions : Model -> Jack -> List Jack

@@ -32,7 +32,7 @@ type alias Process =
     , description : String
     , imageURL : Maybe String
     , position : Vec2
-    , shape : Shape
+    , rect : Rect
     }
 
 type alias Flow =
@@ -48,7 +48,7 @@ type alias Container =
   { id : ID
   , name : String
   , position : Vec2
-  , shape : Shape
+  , rect : Rect
   }
 
 type alias Resource =
@@ -63,14 +63,12 @@ type alias Jack =
   , rate : Float
   , direction : JackDirection
   , position : Vec2
-  , shape : Shape
+  , rect : Rect
   }
 
-type alias Physical a = { a | shape : Shape , position : Vec2 }
+type alias Physical a = { a | rect : Rect , position : Vec2 }
 
-type Shape = Rect Float Float
-           | Chevron Float Float
-           | Circle Float
+type alias Rect = (Float, Float)
 
 type alias Drag =
   { start : Mouse.Position

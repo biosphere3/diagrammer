@@ -48,9 +48,7 @@ drawProcess model process =
   let
     backgroundColor = "cornflowerblue"
     realPosition = getProcessPosition model process
-    (w, h) = case process.shape of
-      Rect w h -> (w, h)
-      _ -> Debug.crash "never"
+    (w, h) = process.rect
 
     attrs =
       [ onMouseDown' <| DragProcess process
@@ -62,7 +60,7 @@ drawProcess model process =
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
-      ] ++ shapeAttrs process.shape realPosition
+      ] ++ shapeAttrs process.rect realPosition
 
     headAttrs =
       --[ x (toString <| realPosition.x - w // 2)
@@ -106,7 +104,7 @@ drawContainer model container =
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
-      ] ++ shapeAttrs container.shape realPosition
+      ] ++ shapeAttrs container.rect realPosition
 
     textAttrs =
       [ fontSize "20px"
@@ -129,7 +127,7 @@ drawJack model jack =
     outline =
       Svg.path
         [ onMouseDown' <| DragJack jack
-        , d <| Shape.chevron 100 50
+        , d <| Shape.chevron Shape.jackDimensions
         , Html.Attributes.style
             [ "cursor" => "move"
             , "fill" => "white"
@@ -201,25 +199,16 @@ isConnected model jack =
       Just _ -> True
       Nothing -> False
 
-shapeAttrs : Shape -> Vec2 -> List (Svg.Attribute Msg)
-shapeAttrs shape position =
-  case shape of
-    Rect w h ->
-      let
-        pos = position `sub` (vec2 (w / 2) (h / 2))
-      in
-        [ x ((getX pos) |> toString)
-        , y ((getY pos) |> toString)
-        , width (w |> toString)
-        , height (h |> toString)
-        ]
-    Circle radius ->
-      [ cx <| toString (getX position)
-      , cy <| toString (getY position)
-      , r <| toString radius
-      ]
-    Chevron width height ->
-      []
+shapeAttrs : Rect -> Vec2 -> List (Svg.Attribute Msg)
+shapeAttrs (w, h) position =
+  let
+    pos = position `sub` (vec2 (w / 2) (h / 2))
+  in
+    [ x ((getX pos) |> toString)
+    , y ((getY pos) |> toString)
+    , width (w |> toString)
+    , height (h |> toString)
+    ]
 
 
 onMouseDown' : Draggable -> Attribute Msg

@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Math.Vector2 exposing (..)
 
 import Model exposing (..)
+import Shape
 import State exposing (Msg(..))
 import Util exposing (..)
 
@@ -56,10 +57,10 @@ init =
 
 
 mkProcess : ID -> { a | name : String, position : Vec2 }  -> Process
-mkProcess id {name, position} = Process id name "" Nothing position (Rect 160 (160 + (toFloat id)))
+mkProcess id {name, position} = Process id name "" Nothing position (160, (160 + (toFloat id)))
 
 mkContainer : ID -> { a | name : String, position : Vec2 }  -> Container
-mkContainer id {name, position} = Container id name position (Rect 160 160)
+mkContainer id {name, position} = Container id name position (160, 160)
 
 --mkFlow id {containerID, jackID, direction} = Flow containerID jackID direction
 
@@ -67,7 +68,7 @@ mkJack processByID id {name, processID, direction} =
   let
     process = seize processID processByID
     position = process.position `add` vec2 100 50
-    shape = Circle 29
+    rect = Shape.jackDimensions
   --in Jack id name processID 42.0 direction position shape
   in
     { id = id
@@ -76,5 +77,5 @@ mkJack processByID id {name, processID, direction} =
     , rate = 42.0
     , direction = direction
     , position = position
-    , shape = shape
+    , rect = rect
     }
