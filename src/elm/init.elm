@@ -10,19 +10,20 @@ import State exposing (Msg(..))
 import Util exposing (..)
 
 processes =
-  [ { name = "Biodigester", position = vec2 100 120 }
-  , { name = "Rainwater Catchment", position = vec2 300 400 }
-  , { name = "Human", position = vec2 500 200 }
+  [ { name = "Solar Panel", position = vec2 400 420 }
+  , { name = "Rainwater Catchment", position = vec2 900 400 }
+  , { name = "Human", position = vec2 800 800 }
   ]
 
 jacks =
-  [ { name = "Compost", processID = 1, direction = Input }
-  , { name = "Water", processID = 0, direction = Output }
+  [ { name = "Light", processID = 0, direction = Input }
+  , { name = "Electricity", processID = 0, direction = Output }
+  , { name = "Water", processID = 1, direction = Output }
   , { name = "Food", processID = 2, direction = Input }
   ]
 
 containers =
-  [ { name = "Barrel", position = vec2 100 600}
+  [ { name = "Sun", position = vec2 600 100}
   ]
 
 init : ( Model, Cmd Msg )

@@ -63,28 +63,29 @@ drawProcess model process =
       ] ++ rectAttrs process.rect realPosition
 
     headAttrs =
-      --[ x (toString <| realPosition.x - w // 2)
-      [ x (toString <| (getX realPosition))
-      , y (toString <| (getY realPosition) - 90)
-      , width (toString w)
+      [ width (toString w)
       , height "40"
       ]
 
     textAttrs = headAttrs ++
-      [ fontSize "20px"
+      [ x (toString <| (getX realPosition))
+      , y (toString <| (getY realPosition) - 90)
+      , fontSize "20px"
       , textAnchor "middle"
       ]
 
     boxAttrs = headAttrs ++
-      [ stroke "black"
+      [ x (toString <| (getX realPosition) - 80)
+      , y (toString <| (getY realPosition) - 120)
       , fill "white"
-      , strokeWidth "2px"
+      , stroke "#ddd"
+      , strokeWidth "1px"
       ]
 
     body = image attrs []
     textBox = rect boxAttrs []
     textContent = text' textAttrs [(text process.name)]
-    head = g [] [textContent]
+    head = g [] [textBox, textContent]
   in
     g []
       [ head
