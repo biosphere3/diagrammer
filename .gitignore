@@ -4,3 +4,4 @@ elm-stuff/
 *.sublime-workspace
 
 target/compiled
+node_modules
