@@ -9,7 +9,7 @@ import Model exposing (..)
 import Util exposing (..)
 
 
-textOffsetRate = 1.5
+textOffsetRate = 1.0
 
 type Msg
     = DragStart Draggable Mouse.Position
@@ -154,7 +154,7 @@ subscriptions model =
         Just _ -> Sub.batch
           [ Mouse.moves DragAt
           , Mouse.ups DragEnd ]
-    ticking = every (100 * millisecond) Tick
+    ticking = every (33 * millisecond) Tick
   in
     Sub.batch [ dragging, ticking ]
 

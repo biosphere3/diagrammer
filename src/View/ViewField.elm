@@ -56,7 +56,7 @@ drawProcess model process =
       , stroke "white"
       , rx "10"
       , ry "10"
-      , xlinkHref <| "//placekitten.com/" ++ toString w ++ "/" ++ toString h
+      , xlinkHref <| "http://placekitten.com/" ++ toString w ++ "/" ++ toString h
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
@@ -100,7 +100,7 @@ drawContainer model container =
       [ onMouseDown' <| DragContainer container
       , fill backgroundColor
       , stroke "white"
-      , xlinkHref "//placekitten.com/400"
+      , xlinkHref "http://placekitten.com/400"
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
