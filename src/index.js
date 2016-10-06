@@ -2,6 +2,6 @@
 
 require('./index.html');
 require('./index.css');
-var Elm = require('./Main');
+var Elm = require('./elm/Main');
 
 Elm.Main.embed(document.getElementById('main'));
