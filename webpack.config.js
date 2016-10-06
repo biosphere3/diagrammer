@@ -24,10 +24,15 @@ module.exports = {
         loader: 'style!css'
       },
       {
+        test: /\.ya?ml$/,
+        exclude: /node_modules/,
+        loader: 'yaml'
+      },
+      {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
         loader: 'elm-hot!elm-webpack'
-      }
+      },
     ],
 
     noParse: /\.elm$/
