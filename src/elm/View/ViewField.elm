@@ -160,7 +160,7 @@ drawFlow ({containerByID, jackByID} as model) flow =
     flowLine =
       Svg.path
         [ d dval
-        , stroke "black"
+        , stroke "cornflowerblue"
         , strokeWidth "25"
         , id domID
         ]
@@ -170,7 +170,7 @@ drawFlow ({containerByID, jackByID} as model) flow =
       text'
         [ alignmentBaseline "bottom"
         , fill "white"
-        , fontSize "20px"
+        , fontSize "16px"
         , fontFamily "Helvetica Neue, sans-serif"
         , dy "5"
         ]
