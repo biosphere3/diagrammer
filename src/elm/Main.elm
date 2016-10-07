@@ -13,7 +13,7 @@ view model =
   Html.div
     []
     [ View.ViewField.view model
-    --, View.ViewUI.view model
+    , View.ViewUI.view model
     ]
 
 main =

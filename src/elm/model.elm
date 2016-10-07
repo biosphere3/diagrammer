@@ -14,6 +14,9 @@ type alias Model =
   , containerByID : ContainerDict
   , flowByID : FlowDict
 
+  -- time
+  , epoch : Int
+
   -- ui
   , drag : Maybe Drag
   , globalTransform : Transform

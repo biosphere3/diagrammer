@@ -19,6 +19,8 @@ type Msg
     | DragEnd Mouse.Position
     | MouseWheelTurn Mouse.Position (Int, Int) Float
 
+    | SetEpoch Int
+
     | Tick Time
 
 
@@ -104,6 +106,9 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
         ratio = Debug.log "delta" <| 1 + delta / 100
       in
         Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
+
+    SetEpoch epoch ->
+      { model | epoch = epoch }
 
     Tick t ->
       let

@@ -9,23 +9,6 @@ import Shape
 import State exposing (Msg(..))
 import Util exposing (..)
 
-processes =
-  [ { name = "Solar Panel", position = vec2 400 420 }
-  , { name = "Rainwater Catchment", position = vec2 900 400 }
-  , { name = "Human", position = vec2 800 800 }
-  ]
-
-jacks =
-  [ { name = "Light", processID = 0, direction = Input }
-  , { name = "Electricity", processID = 0, direction = Output }
-  , { name = "Water", processID = 1, direction = Output }
-  , { name = "Food", processID = 2, direction = Input }
-  ]
-
-containers =
-  [ { name = "Sun", position = vec2 600 100}
-  ]
-
 init : ( Model, Cmd Msg )
 init =
   let
@@ -50,11 +33,29 @@ init =
       , jackByID = jackByID
       , containerByID = containerByID
       , flowByID = flowByID
+      , epoch = 0
       , drag = Nothing
       , globalTransform = { translate = vec2 0 0, scale = 1.0}
       }
       , Cmd.none
     )
+
+processes =
+  [ { name = "Solar Panel", position = vec2 400 420 }
+  , { name = "Rainwater Catchment", position = vec2 900 400 }
+  , { name = "Human", position = vec2 800 800 }
+  ]
+
+jacks =
+  [ { name = "Light", processID = 0, direction = Input }
+  , { name = "Electricity", processID = 0, direction = Output }
+  , { name = "Water", processID = 1, direction = Output }
+  , { name = "Food", processID = 2, direction = Input }
+  ]
+
+containers =
+  [ { name = "Sun", position = vec2 600 100}
+  ]
 
 
 mkProcess : ID -> { a | name : String, position : Vec2 }  -> Process
