@@ -1,10 +1,12 @@
 module State exposing (..)
 
+import Focus exposing (..)
 import Math.Vector2 exposing (..)
 import Mouse
 import Time exposing (..)
 
 import Dict exposing (..)
+import Foci exposing (..)
 import Model exposing (..)
 import Util exposing (..)
 
@@ -16,6 +18,7 @@ type Msg
     | DragAt Mouse.Position
     | DragEnd Mouse.Position
     | MouseWheelTurn Mouse.Position (Int, Int) Float
+
     | Tick Time
 
 
@@ -47,11 +50,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
               { container | position = getContainerPosition model container }
           in case drag.target of
             DragScreen ->
-              let
-                {globalTransform} = model
-                {translate, scale} = globalTransform
-              in
-                updateGlobalTransformTranslate (add (dragOffset drag)) model'
+              Focus.update (globalTransform => translate) (add (dragOffset drag)) model'
             DragProcess dragProcess ->
               let
                 attachedJacks = getJacks model dragProcess
@@ -103,16 +102,8 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
     MouseWheelTurn position (width, height) delta ->
       let
         ratio = Debug.log "delta" <| 1 + delta / 100
-        {globalTransform} = model
-        {translate, scale} = globalTransform
       in
-        { model
-        | globalTransform =
-          { globalTransform
-          | scale = scale * ratio
-          , translate = translate
-          }
-        }
+        Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
 
     Tick t ->
       let

@@ -1,9 +1,11 @@
 module Model exposing (..)
 
 import Dict exposing (Dict)
+import Focus exposing (..)
 import Math.Vector2 exposing (..)
 import Mouse
 
+import Foci exposing (..)
 import Util exposing (..)
 
 type alias Model =
@@ -150,25 +152,15 @@ getJackPosition {drag, processByID} {id, position, processID} =
 
 
 getGlobalTransform : Model -> Transform
-getGlobalTransform ({drag, globalTransform} as model) =
-  case drag of
+getGlobalTransform (model) =
+  case model.drag of
     Nothing -> model.globalTransform
     Just ({target} as drag) ->
       case target of
         DragScreen ->
-          updateGlobalTransformTranslate (add <| dragOffset drag) model
+          update (globalTransform => translate) (add <| dragOffset drag) model
           |> .globalTransform
         _ -> model.globalTransform
-
-
-updateGlobalTransformTranslate : (Vec2 -> Vec2) -> Model -> Model
-updateGlobalTransformTranslate fn ({globalTransform} as model) =
-  { model
-  | globalTransform =
-    { globalTransform
-    | translate = fn globalTransform.translate
-    }
-  }
 
 
 
