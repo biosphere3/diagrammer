@@ -2,6 +2,7 @@ module Init exposing (..)
 
 
 import Dict exposing (Dict)
+import FNV
 import Math.Vector2 exposing (..)
 
 import Model exposing (..)
@@ -19,7 +20,7 @@ type alias LibraryDef =
 type alias ProcessDef =
   { name : String
   , excerpt : String
-  , image : String
+  , image : Maybe String
   , inputs : List JackDef
   , outputs : List JackDef
   }
@@ -37,17 +38,22 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
   let
 
+    (processes, jacks) =
+      let
+        step : ProcessDef -> (List Process, List Jack) -> (List Process, List Jack)
+        step def (ps, js) =
+          parseProcessWithJacks def |> \(p, js') -> (p :: ps, js ++ js')
+      in
+        List.foldl step ([], []) flags.library.processes
+
     processByID : ProcessDict
-    processByID =
-      processes |> (List.indexedMap mkProcess) |> toDictByID
+    processByID = processes |> toDictByID
 
     jackByID : JackDict
-    jackByID =
-      jacks |> (List.indexedMap (mkJack processByID)) |> toDictByID
+    jackByID = jacks |> toDictByID
 
     flowByID : FlowDict
     flowByID = Dict.empty
-      --[] |> (List.indexedMap mkFlow) |> toDictByID
 
     containerByID : ContainerDict
     containerByID =
@@ -65,44 +71,41 @@ init flags =
       , Cmd.none
     )
 
-processes =
-  [ { name = "Solar Panel", position = vec2 400 420 }
-  , { name = "Rainwater Catchment", position = vec2 900 400 }
-  , { name = "Human", position = vec2 800 800 }
-  ]
+parseProcessWithJacks : ProcessDef -> (Process, List Jack)
+parseProcessWithJacks ({inputs, outputs} as def) =
+  let
+    process = parseProcess def
+    parseInput = parseJack process Input
+    parseOutput = parseJack process Output
+    jacks = (List.map parseInput inputs) ++ (List.map parseOutput outputs)
+  in
+    (process, jacks)
 
-jacks =
-  [ { name = "Light", processID = 0, direction = Input }
-  , { name = "Electricity", processID = 0, direction = Output }
-  , { name = "Water", processID = 1, direction = Output }
-  , { name = "Food", processID = 2, direction = Input }
-  ]
+parseProcess : ProcessDef -> Process
+parseProcess {name, excerpt, image} =
+  { id = FNV.hashString name
+  , name = name
+  , description = excerpt
+  , imageURL = image
+  , position = vec2 200 200
+  , rect = (160, 160)
+  }
+
+parseJack : Process -> JackDirection -> JackDef -> Jack
+parseJack  process direction {name, rate, units, per} =
+  { id = FNV.hashString name
+  , name = name
+  , processID = process.id
+  , rate = rate
+  , direction = direction
+  , position = process.position `add` (vec2 100 50)  -- TODO
+  , rect = Shape.jackDimensions
+  }
+
 
 containers =
   [ { name = "Sun", position = vec2 600 100}
   ]
 
-
-mkProcess : ID -> { a | name : String, position : Vec2 }  -> Process
-mkProcess id {name, position} = Process id name "" Nothing position (160, (160 + (toFloat id)))
-
 mkContainer : ID -> { a | name : String, position : Vec2 }  -> Container
 mkContainer id {name, position} = Container id name position (160, 160)
-
---mkFlow id {containerID, jackID, direction} = Flow containerID jackID direction
-
-mkJack processByID id {name, processID, direction} =
-  let
-    process = seize processID processByID
-    position = process.position `add` vec2 100 50
-    rect = Shape.jackDimensions
-  --in Jack id name processID 42.0 direction position shape
-  in
-    { id = id
-    , name = name
-    , processID = processID
-    , rate = 42.0
-    , direction = direction
-    , position = position
-    , rect = rect
-    }

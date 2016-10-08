@@ -11,12 +11,12 @@ toDictByID : List { a | id : Int } -> Dict Int { a | id : Int }
 toDictByID seq =
   let
     f i data =
-      if data.id
+      if data.id > 0
       then (data.id, data)
       else (i, { data | id = i })
   in
     seq
-    |> List.indexedMap (\i data -> (i, { data | id = i }))
+    |> List.indexedMap f
     |> Dict.fromList
 
 
