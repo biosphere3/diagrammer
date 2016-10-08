@@ -17,7 +17,7 @@ view model =
     ]
 
 main =
-  App.program
+  App.programWithFlags
     { init = init
     , view = view
     , update = update

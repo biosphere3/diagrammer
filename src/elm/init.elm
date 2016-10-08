@@ -9,9 +9,34 @@ import Shape
 import State exposing (Msg(..))
 import Util exposing (..)
 
-init : ( Model, Cmd Msg )
-init =
+
+type alias Flags =
+  { library : LibraryDef }
+
+type alias LibraryDef =
+  { processes : List ProcessDef }
+
+type alias ProcessDef =
+  { name : String
+  , excerpt : String
+  , image : String
+  , inputs : List JackDef
+  , outputs : List JackDef
+  }
+
+type alias JackDef =
+  { name : String
+  , rate : Float
+  , units : String
+  , per : String
+  --, state : Maybe String
+  }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
   let
+
     processByID : ProcessDict
     processByID =
       processes |> (List.indexedMap mkProcess) |> toDictByID

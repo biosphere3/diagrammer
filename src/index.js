@@ -6,6 +6,11 @@ var Elm = require('./elm/Main');
 
 var libraryConfig = require("json!yaml!./library.yaml");
 
-console.debug(libraryConfig);
+const flags = {
+  library: libraryConfig
+};
 
-Elm.Main.embed(document.getElementById('main'));
+Elm.Main.embed(
+  document.getElementById('main'),
+  flags
+);

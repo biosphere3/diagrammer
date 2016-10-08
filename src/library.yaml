@@ -1,4 +1,4 @@
-blocks:
+processes:
   - name: "Solar Cities IBC Biodigester"
     excerpt: >
       A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
@@ -8,14 +8,14 @@ blocks:
         state: liquid
         temp: 115F
         rate: 5
-        unit: gal
+        units: gal
         per: day
       - name: "Organic Waste"
         state: solid
         temp: 60F
         rate: 1
-        unit: kg
-        pre: day
+        units: kg
+        per: day
     outputs:
       - name: "Biogas"
         state: gas
