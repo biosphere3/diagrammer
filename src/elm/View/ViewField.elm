@@ -156,12 +156,16 @@ drawFlow ({containerByID, jackByID} as model) flow =
     jx = toString <| processCoords.x
     jy = toString <| processCoords.y
 
+    color = case jack.direction of
+      Input -> "cornflowerblue"
+      Output -> "gold"
+
     domID = "flow-" ++ (toString flow.id)
     dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
     flowLine =
       Svg.path
         [ d dval
-        , stroke "cornflowerblue"
+        , stroke color
         , strokeWidth "25"
         , id domID
         ]

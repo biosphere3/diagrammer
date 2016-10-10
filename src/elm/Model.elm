@@ -62,7 +62,7 @@ type alias Resource =
   }
 
 type alias Jack =
-  { id : ID
+  { id : JackID
   , name : String
   , processID : ID
   , rate : Float
@@ -89,7 +89,11 @@ type Draggable = DragProcess Process
 type MatterState = Solid | Liquid | Gas | Plasma
 
 type JackDirection = Input | Output
-type FlowDirection = InFlow | OutFlow
+
+type alias ProcessID = ID
+type alias JackID = ID
+type alias ContainerID = ID
+type alias FlowID = ID
 
 getProcessPosition : Model -> Process -> Vec2
 getProcessPosition {drag} {id, position} =
@@ -107,6 +111,13 @@ getProcessPosition {drag} {id, position} =
               position
           _ -> position
 
+
+getGetters {processByID, jackByID, containerByID, flowByID} =
+  { getProcess = (flip seize) processByID
+  , getJack = (flip seize) jackByID
+  , getContainer = (flip seize) containerByID
+  , getFlow = (flip seize) flowByID
+  }
 
 getContainerPosition : Model -> Container -> Vec2
 getContainerPosition {drag} {id, position} =

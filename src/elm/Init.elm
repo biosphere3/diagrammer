@@ -57,7 +57,7 @@ init flags =
 
     containerByID : ContainerDict
     containerByID =
-      containers |> (List.indexedMap mkContainer) |> toDictByID
+      containers |> (List.map mkContainer) |> toDictByID
   in
     (
       { processByID = processByID
@@ -83,7 +83,7 @@ parseProcessWithJacks ({inputs, outputs} as def) =
 
 parseProcess : ProcessDef -> Process
 parseProcess {name, excerpt, image} =
-  { id = FNV.hashString name
+  { id = 110000000000 + FNV.hashString name
   , name = name
   , description = excerpt
   , imageURL = image
@@ -93,19 +93,24 @@ parseProcess {name, excerpt, image} =
 
 parseJack : Process -> JackDirection -> JackDef -> Jack
 parseJack  process direction {name, rate, units, per} =
-  { id = FNV.hashString name
-  , name = name
-  , processID = process.id
-  , rate = rate
-  , direction = direction
-  , position = process.position `add` (vec2 100 50)  -- TODO
-  , rect = Shape.jackDimensions
-  }
+  let
+    offset = case direction of
+      Input -> vec2 -200 50
+      Output -> vec2 100 50
+  in
+    { id = 220000000000 + FNV.hashString name
+    , name = name
+    , processID = process.id
+    , rate = rate
+    , direction = direction
+    , position = process.position `add` offset
+    , rect = Shape.jackDimensions
+    }
 
 
 containers =
-  [ { name = "Sun", position = vec2 600 100}
+  [ { id = FNV.hashString "Sun", name = "Sun", position = vec2 600 100}
   ]
 
-mkContainer : ID -> { a | name : String, position : Vec2 }  -> Container
-mkContainer id {name, position} = Container id name position (160, 160)
+mkContainer : { a | name : String, position : Vec2 }  -> Container
+mkContainer {name, position} = Container (440000000000 + FNV.hashString name) name position (160, 160)

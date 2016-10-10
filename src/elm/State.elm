@@ -9,6 +9,7 @@ import Calc
 import Dict exposing (..)
 import Foci exposing (..)
 import Model exposing (..)
+import String
 import Util exposing (..)
 
 
@@ -32,7 +33,9 @@ update msg model =
 
 updateHelp : Msg -> Model -> Model
 updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model) =
-  case msg of
+  let
+    {getProcess, getJack, getContainer, getFlow} = getGetters model
+  in case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
 
@@ -110,10 +113,28 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
 
     SetEpoch epoch ->
       let
-        seeds = containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun") |> List.head |> Maybe.map (\x -> [x]) |> Maybe.withDefault []
+        handleNode ctx =
+          let _ = Debug.log "ctx" ctx
+          in case ctx.node.label of
+            Calc.ProcessNode id ->
+              let
+                process = getProcess id
+              in "process: " ++ process.name
+            Calc.ContainerNode id ->
+              let container = getContainer id
+              in "container: " ++ container.name
+
+        seeds = containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun")
         graph = (Calc.makeGraph model)
-        nodez = Calc.traverse graph seeds
-        _ = Debug.log "whoa" <| List.map Calc.handleNode nodez
+        contexts = Calc.traverse graph seeds
+
+        f x = case x.label of
+          Calc.ContainerNode _ -> "..."
+          Calc.ProcessNode id -> (.name << getProcess) id
+
+        --_ = Debug.log "ctx" (contexts |> List.map (.node >> f))
+
+        _ = Debug.log (List.map handleNode contexts |> String.join "\n") "whoa"
       in
         { model | epoch = epoch }
 
@@ -128,9 +149,9 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
 addFlow' : (Container, Jack) -> Model -> (Model, Flow)
 addFlow' (container, jack) model =
   let
-    id = nextID model.flowByID
+    --id = nextID model.flowByID
     flow =
-      { id = id
+      { id = container.id + jack.id
       , containerID = container.id
       , jackID = jack.id
       , textOffset = -2000
