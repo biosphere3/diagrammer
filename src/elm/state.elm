@@ -152,7 +152,10 @@ subscriptions model =
           , Mouse.ups DragEnd ]
     ticking = every (33 * millisecond) Tick
   in
-    Sub.batch [ dragging, ticking ]
+    Sub.batch
+      [ dragging
+      --, ticking
+      ]
 
 
 nextID : Dict comparable { a | id : ID } -> ID
