@@ -5,6 +5,7 @@ import Math.Vector2 exposing (..)
 import Mouse
 import Time exposing (..)
 
+import Calc
 import Dict exposing (..)
 import Foci exposing (..)
 import Model exposing (..)
@@ -108,7 +109,13 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
         Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
 
     SetEpoch epoch ->
-      { model | epoch = epoch }
+      let
+        seeds = containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun") |> List.head |> Maybe.map (\x -> [x]) |> Maybe.withDefault []
+        graph = (Calc.makeGraph model)
+        nodez = Calc.traverse graph seeds
+        _ = Debug.log "whoa" <| List.map Calc.handleNode nodez
+      in
+        { model | epoch = epoch }
 
     Tick t ->
       let
