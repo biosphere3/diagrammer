@@ -14,6 +14,7 @@ type NodeValue
 
 type alias EdgeValue = Flow
 
+
 getNodeValueID nv =
   case nv of
     JackNode jack -> jack.id
