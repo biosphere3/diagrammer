@@ -87,7 +87,14 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                             newID = nextID model.containerByID
                             newPos = centroid <| List.map .position jacks
                             containerName = "(" ++ dragJack.name ++ ")"
-                          in Container newID containerName newPos (100, 100)
+                          in
+                            { id = newID
+                            , name = containerName
+                            , position = newPos
+                            , rect = (100, 100)
+                            , amount = 0
+                            , capacity = 0
+                            }
 
                         model'' =
                           { model'
@@ -113,28 +120,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
 
     SetEpoch epoch ->
       let
-        handleNode ctx =
-          let _ = Debug.log "ctx" ctx
-          in case ctx.node.label of
-            Calc.ProcessNode id ->
-              let
-                process = getProcess id
-              in "process: " ++ process.name
-            Calc.ContainerNode id ->
-              let container = getContainer id
-              in "container: " ++ container.name
-
-        seeds = containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun")
-        graph = (Calc.makeGraph model)
-        contexts = Calc.traverse graph seeds
-
-        f x = case x.label of
-          Calc.ContainerNode _ -> "..."
-          Calc.ProcessNode id -> (.name << getProcess) id
-
-        --_ = Debug.log "ctx" (contexts |> List.map (.node >> f))
-
-        _ = Debug.log (List.map handleNode contexts |> String.join "\n") "whoa"
+        model' = Calc.updateContainers model
       in
         { model | epoch = epoch }
 

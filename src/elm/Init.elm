@@ -113,4 +113,11 @@ containers =
   ]
 
 mkContainer : { a | name : String, position : Vec2 }  -> Container
-mkContainer {name, position} = Container (440000000000 + FNV.hashString name) name position (160, 160)
+mkContainer {name, position} =
+  { id = (440000000000 + FNV.hashString name)
+  , name = name
+  , position = position
+  , rect = (160, 160)
+  , amount = 0
+  , capacity = 0
+  }

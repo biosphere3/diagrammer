@@ -52,6 +52,8 @@ type alias Flow =
 type alias Container =
   { id : ID
   , name : String
+  , amount : Float
+  , capacity : Float
   , position : Vec2
   , rect : Rect
   }
@@ -111,6 +113,11 @@ getProcessPosition {drag} {id, position} =
               position
           _ -> position
 
+getJacksByProcessID : { a | jackByID : JackDict } -> ProcessID -> List Jack
+getJacksByProcessID {jackByID} processID =
+  jackByID
+    |> Dict.values
+    |> List.filter (.processID >> (==) processID)
 
 getGetters {processByID, jackByID, containerByID, flowByID} =
   { getProcess = (flip seize) processByID

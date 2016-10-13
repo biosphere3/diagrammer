@@ -59,3 +59,39 @@ traverse graph roots =
         graph
   in
     graphPath |> List.reverse
+
+
+applyFlow : Flow -> Model -> Model
+applyFlow flow model =
+  let
+    {getJack, getContainer, getProcess} = getGetters model
+    jack = getJack flow.jackID
+    doFlow container =
+      { container | amount = container.amount + 1} -- TODO
+  in
+    { model | containerByID = Dict.update flow.containerID (Maybe.map doFlow) model.containerByID }
+
+
+updateContainers : Model -> Model
+updateContainers ({containerByID, flowByID} as model) =
+  let
+    flows = Dict.values flowByID
+  in
+    List.foldl applyFlow model flows
+
+--f : Model -> Model
+--f ({containerByID} as model) =
+--  let
+--    {getJack, getContainer, getProcess} = getGetters model
+--    suns = containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun")
+--    graph = makeGraph model
+--    path = traverse graph suns
+--    step ctx =
+--      case ctx of
+--        ProcessNode processID ->
+--          let
+--            jacks = getJacksByProcessID model processID
+--        ContainerNode containerID ->
+--    _ = path |> List.map step
+--  in
+--    model
