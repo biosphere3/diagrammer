@@ -66,7 +66,7 @@ init flags =
       , flowByID = flowByID
       , epoch = 0
       , drag = Nothing
-      , globalTransform = { translate = vec2 0 0, scale = 1.0}
+      , globalTransform = { translate = vec2 0 300, scale = 1.0}
       }
       , Cmd.none
     )
@@ -101,6 +101,7 @@ parseJack  process direction {name, rate, units, per} =
     { id = 220000000000 + FNV.hashString name
     , name = name
     , processID = process.id
+    , flux = 0
     , rate = rate
     , direction = direction
     , position = process.position `add` offset

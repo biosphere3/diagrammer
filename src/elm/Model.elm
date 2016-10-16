@@ -32,19 +32,18 @@ type alias FlowDict = Dict ID Flow
 type alias ContainerDict = Dict ID Container
 
 type alias Process =
-    { id : ID
-    , name : String
-    , description : String
-    , imageURL : Maybe String
-    , position : Vec2
-    , rect : Rect
-    }
+  { id : ID
+  , name : String
+  , description : String
+  , imageURL : Maybe String
+  , position : Vec2
+  , rect : Rect
+  }
 
 type alias Flow =
   { id : ID
   , containerID : ID
   , jackID : ID
-  --, direction : FlowDirection
   --, via : Resource
   , textOffset : Float
   }
@@ -67,7 +66,8 @@ type alias Jack =
   { id : JackID
   , name : String
   , processID : ID
-  , rate : Float
+  , flux : Float -- the actual amount flowing through at the moment
+  , rate : Float -- the potential amount of flow, TODO: needs to be a function
   , direction : JackDirection
   , position : Vec2
   , rect : Rect
@@ -171,6 +171,9 @@ getJackPosition {drag, processByID} {id, position, processID} =
               else position
             _ -> position
 
+getJackFlux : Jack -> Float
+getJackFlux jack =
+  jack.rate
 
 getGlobalTransform : Model -> Transform
 getGlobalTransform (model) =

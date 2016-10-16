@@ -66,10 +66,27 @@ applyFlow flow model =
   let
     {getJack, getContainer, getProcess} = getGetters model
     jack = getJack flow.jackID
+    change = case jack.direction of
+      Input -> -jack.flux
+      Output -> jack.flux
     doFlow container =
-      { container | amount = container.amount + 1} -- TODO
+      { container | amount = container.amount + change }
   in
     { model | containerByID = Dict.update flow.containerID (Maybe.map doFlow) model.containerByID }
+
+
+updateFluxes : List Jack -> Model -> Model
+updateFluxes jacks (model) =
+  let
+    setFlux : Jack -> Jack
+    setFlux jack =
+      { jack | flux = getJackFlux jack }
+
+    updateJack : Jack -> JackDict -> JackDict
+    updateJack jack jackByID =
+      Dict.update jack.id (Maybe.map setFlux) jackByID
+  in
+    { model | jackByID = List.foldl updateJack model.jackByID jacks }
 
 
 updateContainers : Model -> Model
@@ -78,6 +95,21 @@ updateContainers ({containerByID, flowByID} as model) =
     flows = Dict.values flowByID
   in
     List.foldl applyFlow model flows
+
+
+runEpoch : Model -> Model
+runEpoch ({jackByID} as model) =
+  let
+    jacks = Dict.values jackByID
+    inputs = List.filter (\j -> j.direction == Input) jacks
+    outputs = List.filter (\j -> j.direction == Output) jacks
+
+  in
+    model
+      |> updateFluxes inputs
+      |> updateFluxes outputs
+      |> updateContainers
+
 
 --f : Model -> Model
 --f ({containerByID} as model) =
