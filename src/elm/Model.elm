@@ -12,7 +12,7 @@ type alias Model =
   { processByID : ProcessDict
   , jackByID : JackDict
   , containerByID : ContainerDict
-  , flowByID : FlowDict
+  , linkByID : LinkDict
 
   -- time
   , epoch : Int
@@ -28,7 +28,7 @@ type alias ID = Int
 
 type alias ProcessDict = Dict ID Process
 type alias JackDict = Dict ID Jack
-type alias FlowDict = Dict ID Flow
+type alias LinkDict = Dict ID Link
 type alias ContainerDict = Dict ID Container
 
 type alias Process =
@@ -40,7 +40,7 @@ type alias Process =
   , rect : Rect
   }
 
-type alias Flow =
+type alias Link =
   { id : ID
   , containerID : ID
   , jackID : ID
@@ -66,7 +66,7 @@ type alias Jack =
   { id : JackID
   , name : String
   , processID : ID
-  , flux : Float -- the actual amount flowing through at the moment
+  , flow : Float -- the actual amount flowing through at the moment
   , rate : Float -- the potential amount of flow, TODO: needs to be a function
   , direction : JackDirection
   , position : Vec2
@@ -95,7 +95,7 @@ type JackDirection = Input | Output
 type alias ProcessID = ID
 type alias JackID = ID
 type alias ContainerID = ID
-type alias FlowID = ID
+type alias LinkID = ID
 
 getProcessPosition : Model -> Process -> Vec2
 getProcessPosition {drag} {id, position} =
@@ -119,11 +119,11 @@ getJacksByProcessID {jackByID} processID =
     |> Dict.values
     |> List.filter (.processID >> (==) processID)
 
-getGetters {processByID, jackByID, containerByID, flowByID} =
+getGetters {processByID, jackByID, containerByID, linkByID} =
   { getProcess = (flip seize) processByID
   , getJack = (flip seize) jackByID
   , getContainer = (flip seize) containerByID
-  , getFlow = (flip seize) flowByID
+  , getLink = (flip seize) linkByID
   }
 
 getContainerPosition : Model -> Container -> Vec2
@@ -171,8 +171,8 @@ getJackPosition {drag, processByID} {id, position, processID} =
               else position
             _ -> position
 
-getJackFlux : Jack -> Float
-getJackFlux jack =
+getJackFlow : Jack -> Float
+getJackFlow jack =
   jack.rate
 
 getGlobalTransform : Model -> Transform

@@ -52,8 +52,8 @@ init flags =
     jackByID : JackDict
     jackByID = jacks |> toDictByID
 
-    flowByID : FlowDict
-    flowByID = Dict.empty
+    linkByID : LinkDict
+    linkByID = Dict.empty
 
     containerByID : ContainerDict
     containerByID =
@@ -63,7 +63,7 @@ init flags =
       { processByID = processByID
       , jackByID = jackByID
       , containerByID = containerByID
-      , flowByID = flowByID
+      , linkByID = linkByID
       , epoch = 0
       , drag = Nothing
       , globalTransform = { translate = vec2 0 300, scale = 1.0}
@@ -101,7 +101,7 @@ parseJack  process direction {name, rate, units, per} =
     { id = 220000000000 + FNV.hashString name
     , name = name
     , processID = process.id
-    , flux = 0
+    , flow = 0
     , rate = rate
     , direction = direction
     , position = process.position `add` offset

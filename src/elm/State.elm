@@ -32,9 +32,9 @@ update msg model =
 
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model) =
+updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model) =
   let
-    {getProcess, getJack, getContainer, getFlow} = getGetters model
+    {getProcess, getJack, getContainer, getLink} = getGetters model
   in case msg of
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
@@ -76,7 +76,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
               in
                 case containerHit of
                   Just container ->
-                    addFlow (container, dragJack) model'
+                    addLink (container, dragJack) model'
                   Nothing ->
                     if List.length jackHits > 0
                     then
@@ -104,7 +104,7 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
                         pairs = List.map ((,) newContainer) jacks
 
                         model''' = List.foldl
-                          addFlow
+                          addLink
                           model''
                           pairs
                       in
@@ -126,29 +126,29 @@ updateHelp msg ({processByID, jackByID, containerByID, flowByID, drag} as model)
 
     Tick t ->
       let
-        u _ flow = { flow | textOffset = flow.textOffset + textOffsetRate }
-        flowByID' = flowByID |> Dict.map u
+        u _ link = { link | textOffset = link.textOffset + textOffsetRate }
+        linkByID' = linkByID |> Dict.map u
       in
-        { model | flowByID = flowByID' }
+        { model | linkByID = linkByID' }
 
 
-addFlow' : (Container, Jack) -> Model -> (Model, Flow)
-addFlow' (container, jack) model =
+addLink' : (Container, Jack) -> Model -> (Model, Link)
+addLink' (container, jack) model =
   let
-    --id = nextID model.flowByID
-    flow =
+    --id = nextID model.linkByID
+    link =
       { id = container.id + jack.id
       , containerID = container.id
       , jackID = jack.id
       , textOffset = -2000
       }
-    flowByID' = Dict.insert flow.id flow model.flowByID
-    model' = { model | flowByID = flowByID' }
+    linkByID' = Dict.insert link.id link model.linkByID
+    model' = { model | linkByID = linkByID' }
   in
-    (model', flow)
+    (model', link)
 
-addFlow : (Container, Jack) -> Model -> Model
-addFlow pair model = fst <| addFlow' pair model
+addLink : (Container, Jack) -> Model -> Model
+addLink pair model = fst <| addLink' pair model
 
 -- SUBSCRIPTIONS
 

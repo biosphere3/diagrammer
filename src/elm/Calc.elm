@@ -13,7 +13,7 @@ type NodeValue
   = ProcessNode ProcessID
   | ContainerNode ContainerID
 
-type alias EdgeValue = FlowID
+type alias EdgeValue = LinkID
 
 
 getNodeValueID model nv =
@@ -24,23 +24,23 @@ getNodeValueID model nv =
     ContainerNode id -> id
 
 makeGraph : Model -> ModelGraph
-makeGraph ({processByID, containerByID, jackByID, flowByID} as model) =
+makeGraph ({processByID, containerByID, jackByID, linkByID} as model) =
   let
     processes = processByID |> Dict.values
     containers = containerByID |> Dict.values
-    flows = flowByID |> Dict.values
+    links = linkByID |> Dict.values
     makeNode n = Graph.Node (getNodeValueID model n) n
-    makeEdge ({containerID, jackID} as flow) =
+    makeEdge ({containerID, jackID} as link) =
       let
         jack = seize jackID jackByID
       in case jack.direction of
-        Model.Input -> Graph.Edge containerID jack.processID flow.id
-        Model.Output -> Graph.Edge jack.processID containerID flow.id
+        Model.Input -> Graph.Edge containerID jack.processID link.id
+        Model.Output -> Graph.Edge jack.processID containerID link.id
     nodeValues = (++)
       (List.map (ProcessNode << .id) processes)
       (List.map (ContainerNode << .id) containers)
     nodes = List.map makeNode nodeValues
-    edges = List.map makeEdge flows
+    edges = List.map makeEdge links
   in
     Graph.fromNodesAndEdges nodes edges
 
@@ -61,40 +61,40 @@ traverse graph roots =
     graphPath |> List.reverse
 
 
-applyFlow : Flow -> Model -> Model
-applyFlow flow model =
+applyLink : Link -> Model -> Model
+applyLink link model =
   let
     {getJack, getContainer, getProcess} = getGetters model
-    jack = getJack flow.jackID
+    jack = getJack link.jackID
     change = case jack.direction of
-      Input -> -jack.flux
-      Output -> jack.flux
-    doFlow container =
+      Input -> -jack.flow
+      Output -> jack.flow
+    doLink container =
       { container | amount = container.amount + change }
   in
-    { model | containerByID = Dict.update flow.containerID (Maybe.map doFlow) model.containerByID }
+    { model | containerByID = Dict.update link.containerID (Maybe.map doLink) model.containerByID }
 
 
-updateFluxes : List Jack -> Model -> Model
-updateFluxes jacks (model) =
+updateFlows : List Jack -> Model -> Model
+updateFlows jacks (model) =
   let
-    setFlux : Jack -> Jack
-    setFlux jack =
-      { jack | flux = getJackFlux jack }
+    setFlow : Jack -> Jack
+    setFlow jack =
+      { jack | flow = getJackFlow jack }
 
     updateJack : Jack -> JackDict -> JackDict
     updateJack jack jackByID =
-      Dict.update jack.id (Maybe.map setFlux) jackByID
+      Dict.update jack.id (Maybe.map setFlow) jackByID
   in
     { model | jackByID = List.foldl updateJack model.jackByID jacks }
 
 
 updateContainers : Model -> Model
-updateContainers ({containerByID, flowByID} as model) =
+updateContainers ({containerByID, linkByID} as model) =
   let
-    flows = Dict.values flowByID
+    links = Dict.values linkByID
   in
-    List.foldl applyFlow model flows
+    List.foldl applyLink model links
 
 
 runEpoch : Model -> Model
@@ -106,8 +106,8 @@ runEpoch ({jackByID} as model) =
 
   in
     model
-      |> updateFluxes inputs
-      |> updateFluxes outputs
+      |> updateFlows inputs
+      |> updateFlows outputs
       |> updateContainers
 
 

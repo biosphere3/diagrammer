@@ -35,7 +35,7 @@ view model =
       [ Svg.g
         [ transform <| " scale(" ++ (toString scale) ++ ")" ++ "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"
         ]
-        [ Svg.g [] (model.flowByID |> Dict.values |> List.map (drawFlow model))
+        [ Svg.g [] (model.linkByID |> Dict.values |> List.map (drawLink model))
         , Svg.g [] (model.processByID |> Dict.values |> List.map (drawProcess model))
         , Svg.g [] (model.containerByID |> Dict.values |> List.map (drawContainer model))
         , Svg.g [] (looseJacks |> List.map (drawJack model))
@@ -143,11 +143,11 @@ drawJack model jack =
     g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
       [ outline, content ]
 
-drawFlow : Model -> Flow -> Svg Msg
-drawFlow ({containerByID, jackByID} as model) flow =
+drawLink : Model -> Link -> Svg Msg
+drawLink ({containerByID, jackByID} as model) link =
   let
-    container = seize flow.containerID containerByID
-    jack = seize flow.jackID jackByID
+    container = seize link.containerID containerByID
+    jack = seize link.jackID jackByID
     process = getJackProcess model jack
     containerCoords = toRecord <| getContainerPosition model container
     processCoords = toRecord <| getProcessPosition model process
@@ -160,9 +160,9 @@ drawFlow ({containerByID, jackByID} as model) flow =
       Input -> "cornflowerblue"
       Output -> "gold"
 
-    domID = "flow-" ++ (toString flow.id)
+    domID = "link-" ++ (toString link.id)
     dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
-    flowLine =
+    linkLine =
       Svg.path
         [ d dval
         , stroke color
@@ -171,7 +171,7 @@ drawFlow ({containerByID, jackByID} as model) flow =
         ]
         []
 
-    flowText =
+    linkText =
       text'
         [ alignmentBaseline "bottom"
         , fill "white"
@@ -181,7 +181,7 @@ drawFlow ({containerByID, jackByID} as model) flow =
         ]
         [ textPath
           [ xlinkHref <| "#" ++ domID
-          , startOffset <| toString flow.textOffset
+          , startOffset <| toString link.textOffset
           ]
           [ text <| String.join " (2kg/day) › › › › › " <| repeat 100 (String.toUpper jack.name)
           ]
@@ -190,17 +190,17 @@ drawFlow ({containerByID, jackByID} as model) flow =
 
   in
     g []
-      [ flowLine
-      , flowText
+      [ linkLine
+      , linkText
       ]
 
 
 isConnected : Model -> Jack -> Bool
 isConnected model jack =
   let
-    flow = model.flowByID |> Dict.values |> List.filter (\{jackID} -> jack.id == jackID) |> List.head
+    link = model.linkByID |> Dict.values |> List.filter (\{jackID} -> jack.id == jackID) |> List.head
   in
-    case flow of
+    case link of
       Just _ -> True
       Nothing -> False
 
