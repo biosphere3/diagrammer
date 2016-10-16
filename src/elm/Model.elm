@@ -22,6 +22,9 @@ type alias Model =
   , globalTransform : Transform
   }
 
+
+----------------
+
 type alias Transform = { translate : Vec2, scale : Float }
 
 type alias ID = Int
@@ -51,7 +54,6 @@ type alias Link =
 type alias Container =
   { id : ID
   , name : String
-  , amount : Float
   , capacity : Float
   , position : Vec2
   , rect : Rect
@@ -66,7 +68,6 @@ type alias Jack =
   { id : JackID
   , name : String
   , processID : ID
-  , flow : Float -- the actual amount flowing through at the moment
   , rate : Float -- the potential amount of flow, TODO: needs to be a function
   , direction : JackDirection
   , position : Vec2
@@ -173,7 +174,9 @@ getJackPosition {drag, processByID} {id, position, processID} =
 
 getJackFlow : Jack -> Float
 getJackFlow jack =
-  jack.rate
+  case jack.direction of
+    Input -> -jack.rate
+    Output -> jack.rate
 
 getGlobalTransform : Model -> Transform
 getGlobalTransform (model) =

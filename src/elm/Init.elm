@@ -101,7 +101,6 @@ parseJack  process direction {name, rate, units, per} =
     { id = 220000000000 + FNV.hashString name
     , name = name
     , processID = process.id
-    , flow = 0
     , rate = rate
     , direction = direction
     , position = process.position `add` offset
@@ -119,6 +118,5 @@ mkContainer {name, position} =
   , name = name
   , position = position
   , rect = (160, 160)
-  , amount = 1/0
   , capacity = 1/0
   }

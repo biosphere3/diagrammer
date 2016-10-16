@@ -92,7 +92,6 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
                             , name = containerName
                             , position = newPos
                             , rect = (100, 100)
-                            , amount = 0
                             , capacity = 0
                             }
 
@@ -120,9 +119,11 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
 
     SetEpoch epoch ->
       let
-        model' = Calc.getState model epoch  -- TODO: use initial conditions, not current model
+        calc = Calc.getCalc model epoch
       in
-        { model' | epoch = epoch }
+        { model
+        | epoch = epoch
+        , calc = calc }
 
     Tick t ->
       let

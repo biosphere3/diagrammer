@@ -1,122 +1,93 @@
-module Calc exposing (..)
+module Calc exposing (Calc, getCalc)
 
 import Dict exposing (Dict)
-import Graph exposing (..)
 
 import Model exposing (..)
 import Util exposing (..)
 
-type alias ModelGraph = Graph NodeValue EdgeValue
-type alias ModelNodeContext = Graph.NodeContext NodeValue EdgeValue
 
-type NodeValue
-  = ProcessNode ProcessID
-  | ContainerNode ContainerID
+-- Calc
 
-type alias EdgeValue = LinkID
+type alias Calc =
+  { jackByID : Dict JackID JackCalc
+  , containerByID : Dict ContainerID ContainerCalc
+  , linkByID : Dict LinkID Link  -- duplicate of what's in Model
+  }
+
+type alias JackCalc = { flow : Float }
+
+type alias ContainerCalc = { amount : Float }
 
 
-getNodeValueID model nv =
+
+applyLink : Link -> Calc -> Calc
+applyLink link ({jackByID, containerByID} as calc) =
   let
-    {getJack, getContainer} = getGetters model
-  in case nv of
-    ProcessNode id -> id
-    ContainerNode id -> id
-
-makeGraph : Model -> ModelGraph
-makeGraph ({processByID, containerByID, jackByID, linkByID} as model) =
-  let
-    processes = processByID |> Dict.values
-    containers = containerByID |> Dict.values
-    links = linkByID |> Dict.values
-    makeNode n = Graph.Node (getNodeValueID model n) n
-    makeEdge ({containerID, jackID} as link) =
-      let
-        jack = seize jackID jackByID
-      in case jack.direction of
-        Model.Input -> Graph.Edge containerID jack.processID link.id
-        Model.Output -> Graph.Edge jack.processID containerID link.id
-    nodeValues = (++)
-      (List.map (ProcessNode << .id) processes)
-      (List.map (ContainerNode << .id) containers)
-    nodes = List.map makeNode nodeValues
-    edges = List.map makeEdge links
-  in
-    Graph.fromNodesAndEdges nodes edges
-
-
-traverse : ModelGraph -> List { a | id : Model.ID } -> List ModelNodeContext
-traverse graph roots =
-  let
-    --visitor ctxs dist acc =
-    visitor = Graph.ignorePath (::)
-    (graphPath, _) =
-      Graph.guidedBfs
-        Graph.alongOutgoingEdges
-        visitor
-        (List.map .id roots)
-        []
-        graph
-  in
-    graphPath |> List.reverse
-
-
-applyLink : Link -> Model -> Model
-applyLink link model =
-  let
-    {getJack, getContainer, getProcess} = getGetters model
-    jack = getJack link.jackID
-    change = case jack.direction of
-      Input -> -jack.flow
-      Output -> jack.flow
+    jack = seize link.jackID jackByID
     doLink container =
-      { container | amount = container.amount + change }
+      { container | amount = container.amount + jack.flow }
   in
-    { model | containerByID = Dict.update link.containerID (Maybe.map doLink) model.containerByID }
+    { calc | containerByID = Dict.update link.containerID (Maybe.map doLink) containerByID }
 
 
-updateFlows : List Jack -> Model -> Model
-updateFlows jacks (model) =
+updateFlows : List Jack -> Calc -> Calc
+updateFlows jacks ({jackByID} as calc) =
   let
-    setFlow : Jack -> Jack
-    setFlow jack =
-      { jack | flow = getJackFlow jack }
+    setFlow : Jack -> JackCalc -> JackCalc
+    setFlow jack jackCalc =
+      { jackCalc | flow = getJackFlow jack }
 
-    updateJack : Jack -> JackDict -> JackDict
+    -- updateJack : Jack -> JackDict -> JackDict
     updateJack jack jackByID =
-      Dict.update jack.id (Maybe.map setFlow) jackByID
+      Dict.update jack.id (Maybe.map (setFlow jack)) jackByID
   in
-    { model | jackByID = List.foldl updateJack model.jackByID jacks }
+    { calc | jackByID = List.foldl updateJack jackByID jacks }
 
 
-updateContainers : Model -> Model
-updateContainers ({containerByID, linkByID} as model) =
+updateContainers : Calc -> Calc
+updateContainers ({linkByID} as calc) =
   let
     links = Dict.values linkByID
   in
-    List.foldl applyLink model links
+    List.foldl applyLink calc links
 
-
-getState : Model -> Int -> Model
-getState initialModel epoch =
-  if epoch == 0 then
-    initialModel
-  else
-    stepEpoch (getState initialModel (epoch - 1))
-
-
-stepEpoch : Model -> Model
-stepEpoch ({jackByID} as model) =
+stepEpoch : Model -> Calc -> Calc
+stepEpoch ({jackByID} as model) calc =
   let
     jacks = Dict.values jackByID
     inputs = List.filter (\j -> j.direction == Input) jacks
     outputs = List.filter (\j -> j.direction == Output) jacks
   in
-    model
+    calc
       |> updateFlows inputs
       |> updateFlows outputs
       |> updateContainers
 
+getInitialCalc : Model -> Calc
+getInitialCalc model =
+  let
+    jackByID = model.jackByID |> Dict.map (\i j -> { flow = 0})
+    containerByID = model.containerByID |> Dict.map (\i c -> { amount = 0})
+    linkByID = model.linkByID
+  in
+    { jackByID = jackByID
+    , containerByID = containerByID
+    , linkByID = linkByID
+    }
+
+getCalc : Model -> Int -> Calc
+getCalc model epoch =
+  let
+    initial = getInitialCalc model
+  in
+    reduceCalc (stepEpoch model) initial epoch
+
+reduceCalc : (Calc -> Calc) -> Calc -> Int -> Calc
+reduceCalc step calc epoch =
+  if epoch == 0 then
+    calc
+  else
+    step (reduceCalc step calc (epoch - 1))
 
 --f : Model -> Model
 --f ({containerByID} as model) =
