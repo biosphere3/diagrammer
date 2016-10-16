@@ -119,6 +119,6 @@ mkContainer {name, position} =
   , name = name
   , position = position
   , rect = (160, 160)
-  , amount = 0
-  , capacity = 0
+  , amount = 1/0
+  , capacity = 1/0
   }

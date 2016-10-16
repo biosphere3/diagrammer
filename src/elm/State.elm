@@ -120,9 +120,9 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
 
     SetEpoch epoch ->
       let
-        model' = Calc.updateContainers model
+        model' = Calc.getState model epoch  -- TODO: use initial conditions, not current model
       in
-        { model | epoch = epoch }
+        { model' | epoch = epoch }
 
     Tick t ->
       let

@@ -97,6 +97,9 @@ drawContainer model container =
   let
     backgroundColor = "orange"
     realPosition = getContainerPosition model container
+
+    displayText = container.name ++ " " ++ (toString container.amount)
+
     attrs =
       [ onMouseDown' <| DragContainer container
       , fill backgroundColor
@@ -116,7 +119,7 @@ drawContainer model container =
   in
     g []
       [ rect attrs []
-      , text' textAttrs [text container.name]
+      , text' textAttrs [text displayText]
       ]
 
 drawJack : Model -> Jack -> Svg Msg
@@ -157,11 +160,18 @@ drawLink ({containerByID, jackByID} as model) link =
     jy = toString <| processCoords.y
 
     color = case jack.direction of
-      Input -> "cornflowerblue"
-      Output -> "gold"
+      Input -> "#008800"
+      Output -> "#004400"
+
+    arrowText = case jack.direction of
+      Input -> "   ❯ ❯ ❯   "
+      Output -> "  ❮ ❮ ❮  "
 
     domID = "link-" ++ (toString link.id)
     dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
+    displayText =
+      (String.toUpper jack.name) ++ " " ++ (toString jack.flow)
+
     linkLine =
       Svg.path
         [ d dval
@@ -183,7 +193,7 @@ drawLink ({containerByID, jackByID} as model) link =
           [ xlinkHref <| "#" ++ domID
           , startOffset <| toString link.textOffset
           ]
-          [ text <| String.join " (2kg/day) › › › › › " <| repeat 100 (String.toUpper jack.name)
+          [ text <| String.join arrowText <| repeat 100 displayText
           ]
         ]
 

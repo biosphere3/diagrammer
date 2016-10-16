@@ -97,13 +97,20 @@ updateContainers ({containerByID, linkByID} as model) =
     List.foldl applyLink model links
 
 
-runEpoch : Model -> Model
-runEpoch ({jackByID} as model) =
+getState : Model -> Int -> Model
+getState initialModel epoch =
+  if epoch == 0 then
+    initialModel
+  else
+    stepEpoch (getState initialModel (epoch - 1))
+
+
+stepEpoch : Model -> Model
+stepEpoch ({jackByID} as model) =
   let
     jacks = Dict.values jackByID
     inputs = List.filter (\j -> j.direction == Input) jacks
     outputs = List.filter (\j -> j.direction == Output) jacks
-
   in
     model
       |> updateFlows inputs
