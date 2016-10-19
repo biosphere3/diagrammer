@@ -2,12 +2,16 @@
 
 Visually connect various processes to design closed-loop systems with desired production characteristics
 
+
+
 ## Running in dev mode
 
-1. Download the [Elm Platform](https://guide.elm-lang.org/get_started.html)
-2. Clone or download this repo
-3. `cd` to the repo and run `elm-reactor`
-4. Visit [http://localhost:8000/dev/index.dev.html](http://localhost:8000/dev/index.dev.html) in your browser
+First make sure you have a recent version of `npm` installed
 
-Changes to the source will be available by refreshing the page in the browser
+1. Download and install the [Elm Platform](https://guide.elm-lang.org/get_started.html)
+2. Clone or download this repo and `cd` to it
+3. `npm install`
+4. `npm run dev`
+4. Visit [http://localhost:3000](http://localhost:3000) in your browser
 
+Changes to the source will be hot reloaded without losing the application state!
