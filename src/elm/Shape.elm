@@ -9,7 +9,7 @@ chevron (width, height) =
   let
     angle = degrees 60
     dy = height / 2
-    dx = dy / tan angle
+    dx = -dy / tan angle
     ts = toString
     pair x y = (toString x) ++ "," ++ (toString y)
   in

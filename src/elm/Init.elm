@@ -97,7 +97,7 @@ parseJack  process direction {name, rate, units, per} =
   let
     offset = case direction of
       Input -> vec2 -200 50
-      Output -> vec2 100 50
+      Output -> vec2 120 50
   in
     { id = 220000000000 + FNV.hashString name
     , name = name
