@@ -1,23 +1,10 @@
-module Calc exposing (Calc, getCalc)
+module Calc exposing (getCalc)
 
 import Dict exposing (Dict)
 
 import Model exposing (..)
 import Util exposing (..)
-
-
--- Calc
-
-type alias Calc =
-  { jackByID : Dict JackID JackCalc
-  , containerByID : Dict ContainerID ContainerCalc
-  , linkByID : Dict LinkID Link  -- duplicate of what's in Model
-  }
-
-type alias JackCalc = { flow : Float }
-
-type alias ContainerCalc = { amount : Float }
-
+import Purememo exposing (purememo)
 
 
 applyLink : Link -> Calc -> Calc
@@ -51,6 +38,10 @@ updateContainers ({linkByID} as calc) =
   in
     List.foldl applyLink calc links
 
+updateEpoch : Calc -> Calc
+updateEpoch calc =
+  { calc | epoch = calc.epoch + 1 }
+
 stepEpoch : Model -> Calc -> Calc
 stepEpoch ({jackByID} as model) calc =
   let
@@ -59,6 +50,7 @@ stepEpoch ({jackByID} as model) calc =
     outputs = List.filter (\j -> j.direction == Output) jacks
   in
     calc
+      |> updateEpoch
       |> updateFlows inputs
       |> updateFlows outputs
       |> updateContainers
@@ -73,14 +65,17 @@ getInitialCalc model =
     { jackByID = jackByID
     , containerByID = containerByID
     , linkByID = linkByID
+    , epoch = 0
     }
 
-getCalc : Model -> Calc
+getCalc : Model -> (Calc, CalcCache)
 getCalc model =
   let
     initial = getInitialCalc model
+    step = purememo .epoch (stepEpoch model)
+    (calc, cache) = Purememo.repeat step model.calcCache model.epoch initial
   in
-    reduceCalc (stepEpoch model) initial model.epoch
+    (calc, cache)
 
 reduceCalc : (Calc -> Calc) -> Calc -> Int -> Calc
 reduceCalc step calc epoch =

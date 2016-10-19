@@ -28,7 +28,29 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  ( updateHelp msg model, Cmd.none )
+  ( manageCache msg <| updateHelp msg <| model
+  , Cmd.none
+  )
+
+
+{-| Populate the calcCache appropriately based on the Msg
+Note that next time getCalc is called, it will just be a Dict lookup
+-}
+manageCache : Msg -> Model -> Model
+manageCache msg model =
+  let
+    calc model =
+      { model | calcCache = snd <| Calc.getCalc model }
+    clear model =
+      { model | calcCache = Dict.empty }
+    recalc = calc << clear
+  in case msg of
+    DragStart _ _         -> model
+    DragAt _              -> model
+    MouseWheelTurn _ _ _  -> model
+    Tick _                -> model
+    SetEpoch _            -> calc model
+    DragEnd _             -> recalc model
 
 
 updateHelp : Msg -> Model -> Model

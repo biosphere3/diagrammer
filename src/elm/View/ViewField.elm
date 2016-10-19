@@ -14,7 +14,7 @@ import Svg.Attributes exposing (..)
 import Maybe exposing (..)
 import Util exposing (..)
 import Model exposing (..)
-import Calc exposing (Calc, getCalc)
+import Calc exposing (getCalc)
 import Shape
 import State exposing (Msg(..))
 
@@ -26,7 +26,7 @@ view model =
     xf = getGlobalTransform model
     (gx, gy) = toTuple <| .translate <| xf
     scale = .scale <| xf
-    calc = getCalc model
+    (calc, _) = getCalc model
 
     looseJacks = model.jackByID |> Dict.values |> List.filter (not << isConnected model)
   in

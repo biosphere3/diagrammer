@@ -17,6 +17,9 @@ type alias Model =
   -- time
   , epoch : Int
 
+  -- calc
+  , calcCache : CalcCache
+
   -- ui
   , drag : Maybe Drag
   , globalTransform : Transform
@@ -97,6 +100,22 @@ type alias ProcessID = ID
 type alias JackID = ID
 type alias ContainerID = ID
 type alias LinkID = ID
+
+-- Calc
+
+type alias Calc =
+  { jackByID : Dict JackID JackCalc
+  , containerByID : Dict ContainerID ContainerCalc
+  , linkByID : Dict LinkID Link  -- duplicate of what's in Model
+  , epoch : Int
+  }
+
+type alias CalcCache = Dict Int Calc
+
+type alias JackCalc = { flow : Float }
+
+type alias ContainerCalc = { amount : Float }
+
 
 getProcessPosition : Model -> Process -> Vec2
 getProcessPosition {drag} {id, position} =

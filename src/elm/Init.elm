@@ -67,6 +67,7 @@ init flags =
       , epoch = 0
       , drag = Nothing
       , globalTransform = { translate = vec2 0 300, scale = 1.0}
+      , calcCache = Dict.empty
       }
       , Cmd.none
     )
