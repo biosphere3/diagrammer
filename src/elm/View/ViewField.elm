@@ -52,6 +52,7 @@ drawProcess model calc process =
     backgroundColor = "cornflowerblue"
     realPosition = getProcessPosition model process
     (w, h) = process.rect
+    imageURL = process.imageURL |> withDefault ("http://placekitten.com/" ++ toString w ++ "/" ++ toString h)
 
     attrs =
       [ onMouseDown' <| DragProcess process
@@ -59,7 +60,7 @@ drawProcess model calc process =
       , stroke "white"
       , rx "10"
       , ry "10"
-      , xlinkHref <| "http://placekitten.com/" ++ toString w ++ "/" ++ toString h
+      , xlinkHref <| imageURL
       , Html.Attributes.style
           [ "cursor" => "move"
           ]

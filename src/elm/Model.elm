@@ -192,11 +192,13 @@ getJackPosition {drag, processByID} {id, position, processID} =
               else position
             _ -> position
 
+
 getJackFlow : Jack -> Float
 getJackFlow jack =
   case jack.direction of
     Input -> -jack.rate
     Output -> jack.rate
+
 
 getGlobalTransform : Model -> Transform
 getGlobalTransform (model) =
@@ -208,7 +210,6 @@ getGlobalTransform (model) =
           update (globalTransform => translate) (add <| dragOffset drag) model
           |> .globalTransform
         _ -> model.globalTransform
-
 
 
 -- helpers ------------------------------------------
