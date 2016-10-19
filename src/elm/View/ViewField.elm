@@ -180,31 +180,46 @@ drawLink ({containerByID, jackByID} as model) calc link =
       Input -> "  ❯ ❯ ❯  "
       Output -> "  ❮ ❮ ❮  "
 
+    linkClass = case jack.direction of
+      Input -> "input"
+      Output -> "output"
+
     domID = "link-" ++ (toString link.id)
     dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
     displayText =
       (String.toUpper jack.name) ++ " " ++ flowDisplay
 
-    linkLine =
+    linkStripe =
       Svg.path
         [ d dval
         , stroke color
-        , strokeWidth "25"
+        , strokeWidth "20"
         , id domID
+        , class "link-stripe"
+        ]
+        []
+
+    linkLine =
+      Svg.path
+        [ d dval
+        , stroke "white"
+        , strokeWidth "5"
+        , strokeDasharray "10,20"
+        , id domID
+        , class "link-line"
         ]
         []
 
     linkText =
       text'
         [ alignmentBaseline "bottom"
-        , fill "white"
+        , fill "black"
         , fontSize "16px"
         , fontFamily "Helvetica Neue, sans-serif"
-        , dy "5"
+        , dy "-15"
         ]
         [ textPath
           [ xlinkHref <| "#" ++ domID
-          , startOffset <| toString link.textOffset
           ]
           [ text <| String.join arrowText <| repeat 100 displayText
           ]
@@ -212,8 +227,10 @@ drawLink ({containerByID, jackByID} as model) calc link =
 
 
   in
-    g []
-      [ linkLine
+    g [ class <| "link " ++ linkClass
+      ]
+      [ linkStripe
+      , linkLine
       , linkText
       ]
 

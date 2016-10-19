@@ -147,7 +147,14 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
 
     Tick t ->
       let
-        u _ link = { link | textOffset = link.textOffset + textOffsetRate }
+        rate jack = case jack.direction of
+          Input -> -textOffsetRate
+          Output -> textOffsetRate
+        u _ link =
+          let
+            offsetRate = Dict.get link.jackID model.jackByID |> Maybe.map rate |> Maybe.withDefault 0
+          in
+            { link | textOffset = link.textOffset + offsetRate }
         linkByID' = linkByID |> Dict.map u
       in
         { model | linkByID = linkByID' }

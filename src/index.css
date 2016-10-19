@@ -18,3 +18,30 @@ svg text {
 svg text::selection {
     background: none;
 }
+
+g.link:hover .link-line {
+  animation-play-state: running;
+  opacity: 0.4;
+}
+
+g.link .link-stripe {
+  opacity: 0.8;
+}
+
+g.link .link-line {
+  opacity: 0;
+  animation-name: movelink;
+  animation-play-state: paused;
+  animation-duration: 500ms;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+g.link.input .link-line {
+  animation-direction: reverse;
+}
+
+@keyframes movelink {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 30px; }
+}

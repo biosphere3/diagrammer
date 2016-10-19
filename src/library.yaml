@@ -116,7 +116,7 @@ processes:
   - name: G-Tower Array
     excerpt: >
         The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
-    image: https://scontent.xx.fbcdn.net/hphotos-xfl1/v/t1.0-9/12631440_10154539593541562_7572167586045293641_n.jpg
+    image: null
     inputs:
       - name: Nutrient Rich Water
         state: liquid
@@ -176,7 +176,7 @@ processes:
   - name: Carbon Battery
     excerpt: >
         A carbon battery turns unprocessed biomass into heat, hot water, and electricity.
-    image: https://scontent.xx.fbcdn.net/hphotos-xaf1/v/t1.0-9/12359906_833854851331_3570931081812040520_n.jpg
+    image: null
     inputs:
       - name: Biomass
         state: solid
