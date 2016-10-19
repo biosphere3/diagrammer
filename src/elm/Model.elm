@@ -58,6 +58,7 @@ type alias Container =
   { id : ID
   , name : String
   , capacity : Float
+  , initialAmount : Float
   , position : Vec2
   , rect : Rect
   }

@@ -59,7 +59,7 @@ getInitialCalc : Model -> Calc
 getInitialCalc model =
   let
     jackByID = model.jackByID |> Dict.map (\i j -> { flow = 0})
-    containerByID = model.containerByID |> Dict.map (\i c -> { amount = 0})
+    containerByID = model.containerByID |> Dict.map (\_ {initialAmount} -> { amount = initialAmount})
     linkByID = model.linkByID
   in
     { jackByID = jackByID

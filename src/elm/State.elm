@@ -114,7 +114,8 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
                             , name = containerName
                             , position = newPos
                             , rect = (100, 100)
-                            , capacity = 0
+                            , capacity = 1/0
+                            , initialAmount = 0
                             }
 
                         model'' =
