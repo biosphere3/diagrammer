@@ -1,0 +1,3 @@
+[submodule "elm-purememo"]
+	path = elm-purememo
+	url = https://github.com/maackle/elm-purememo
