@@ -75,12 +75,12 @@ getInitialCalc model =
     , linkByID = linkByID
     }
 
-getCalc : Model -> Int -> Calc
-getCalc model epoch =
+getCalc : Model -> Calc
+getCalc model =
   let
     initial = getInitialCalc model
   in
-    reduceCalc (stepEpoch model) initial epoch
+    reduceCalc (stepEpoch model) initial model.epoch
 
 reduceCalc : (Calc -> Calc) -> Calc -> Int -> Calc
 reduceCalc step calc epoch =

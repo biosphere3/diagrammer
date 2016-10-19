@@ -4,15 +4,17 @@ import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on, onMouseEnter, onMouseLeave)
-import Json.Decode as Json exposing (..)
+import Json.Decode as Json exposing ((:=), int, float, object4, object2)
 import Math.Vector2 exposing (..)
 import Mouse
 import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
+import Maybe exposing (..)
 import Util exposing (..)
 import Model exposing (..)
+import Calc exposing (Calc, getCalc)
 import Shape
 import State exposing (Msg(..))
 
@@ -24,6 +26,7 @@ view model =
     xf = getGlobalTransform model
     (gx, gy) = toTuple <| .translate <| xf
     scale = .scale <| xf
+    calc = getCalc model
 
     looseJacks = model.jackByID |> Dict.values |> List.filter (not << isConnected model)
   in
@@ -35,16 +38,16 @@ view model =
       [ Svg.g
         [ transform <| " scale(" ++ (toString scale) ++ ")" ++ "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"
         ]
-        [ Svg.g [] (model.linkByID |> Dict.values |> List.map (drawLink model))
-        , Svg.g [] (model.processByID |> Dict.values |> List.map (drawProcess model))
-        , Svg.g [] (model.containerByID |> Dict.values |> List.map (drawContainer model))
-        , Svg.g [] (looseJacks |> List.map (drawJack model))
+        [ Svg.g [] (model.linkByID |> Dict.values |> List.map (drawLink model calc))
+        , Svg.g [] (model.processByID |> Dict.values |> List.map (drawProcess model calc))
+        , Svg.g [] (model.containerByID |> Dict.values |> List.map (drawContainer model calc))
+        , Svg.g [] (looseJacks |> List.map (drawJack model calc))
         ]
       ]
 
 
-drawProcess : Model -> Process -> Svg Msg
-drawProcess model process =
+drawProcess : Model -> Calc -> Process -> Svg Msg
+drawProcess model calc process =
   let
     backgroundColor = "cornflowerblue"
     realPosition = getProcessPosition model process
@@ -92,13 +95,17 @@ drawProcess model process =
       , body ]
 
 
-drawContainer : Model -> Container -> Svg Msg
-drawContainer model container =
+drawContainer : Model -> Calc -> Container -> Svg Msg
+drawContainer model calc container =
   let
     backgroundColor = "orange"
     realPosition = getContainerPosition model container
+    amountDisplay =
+      Dict.get container.id calc.containerByID
+      |> Maybe.map (toString << .amount)
+      |> Maybe.withDefault "???"
 
-    displayText = container.name ++ " " ++ (toString container.amount)
+    displayText = container.name ++ " " ++ amountDisplay
 
     attrs =
       [ onMouseDown' <| DragContainer container
@@ -122,8 +129,8 @@ drawContainer model container =
       , text' textAttrs [text displayText]
       ]
 
-drawJack : Model -> Jack -> Svg Msg
-drawJack model jack =
+drawJack : Model -> Calc -> Jack -> Svg Msg
+drawJack model calc jack =
   let
     jackCoords = toRecord <| getJackPosition model jack
     x0 = toString <| jackCoords.x
@@ -146,8 +153,8 @@ drawJack model jack =
     g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
       [ outline, content ]
 
-drawLink : Model -> Link -> Svg Msg
-drawLink ({containerByID, jackByID} as model) link =
+drawLink : Model -> Calc -> Link -> Svg Msg
+drawLink ({containerByID, jackByID} as model) calc link =
   let
     container = seize link.containerID containerByID
     jack = seize link.jackID jackByID
@@ -159,18 +166,23 @@ drawLink ({containerByID, jackByID} as model) link =
     jx = toString <| processCoords.x
     jy = toString <| processCoords.y
 
+    flowDisplay =
+      Dict.get jack.id calc.jackByID
+      |> map (toString << .flow)
+      |> withDefault "???"
+
     color = case jack.direction of
       Input -> "#008800"
       Output -> "#004400"
 
     arrowText = case jack.direction of
-      Input -> "   ❯ ❯ ❯   "
+      Input -> "  ❯ ❯ ❯  "
       Output -> "  ❮ ❮ ❮  "
 
     domID = "link-" ++ (toString link.id)
     dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
     displayText =
-      (String.toUpper jack.name) ++ " " ++ (toString jack.flow)
+      (String.toUpper jack.name) ++ " " ++ flowDisplay
 
     linkLine =
       Svg.path

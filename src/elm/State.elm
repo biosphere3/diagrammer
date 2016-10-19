@@ -118,12 +118,9 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
         Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
 
     SetEpoch epoch ->
-      let
-        calc = Calc.getCalc model epoch
-      in
-        { model
-        | epoch = epoch
-        , calc = calc }
+      { model
+      | epoch = epoch
+      }
 
     Tick t ->
       let
