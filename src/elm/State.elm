@@ -64,14 +64,13 @@ connectJacks model dragJack jack =
     jacks = [dragJack, jack]
     newContainer =
       let
-        newID = nextID model.containerByID
         newPos = centroid <| List.map .position jacks
-        containerName = "(" ++ dragJack.name ++ ")"
+        containerName = dragJack.name
       in
-        { id = newID
+        { id = generateContainerID containerName
         , name = containerName
         , position = newPos
-        , rect = (100, 100)
+        , radius = 62
         , capacity = 1/0
         , initialAmount = 0
         }
@@ -189,7 +188,6 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
 addLink' : (Container, Jack) -> Model -> (Model, Link)
 addLink' (container, jack) model =
   let
-    --id = nextID model.linkByID
     link =
       { id = container.id + jack.id
       , containerID = container.id
@@ -235,36 +233,6 @@ nextID dict =
   |> Maybe.withDefault 0
   |> (+) 1
 
-
-rectsCollide : Physical a -> Physical b -> Bool
-rectsCollide a b =
-  let
-    (w1, h1) = a.rect
-    (w2, h2) = b.rect
-    d = a.position `sub` b.position
-    (dx, dy) = toTuple d
-  in
-    abs dx < (w1 + w2) / 2 && abs dy < (h1 + h2) / 2
-
-
-jackCollisions : Model -> Jack -> List Jack
-jackCollisions model jack =
-  let
-    jacks = Dict.values model.jackByID
-    hit = \j -> j.id /= jack.id && (rectsCollide jack j)
-  in
-    List.filter hit jacks
-
-jackContainerCollision : Model -> Jack -> Maybe Container
-jackContainerCollision model jack =
-  let
-    containers : List Container
-    containers = Dict.values model.containerByID
-
-    hit : Container -> Bool
-    hit = rectsCollide jack
-  in
-    List.head <| List.filter hit containers
 
 getJacks : Model -> Process -> List Jack
 getJacks {jackByID} process =

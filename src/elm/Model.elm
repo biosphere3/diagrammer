@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Dict exposing (Dict)
+import FNV
 import Focus exposing (..)
 import Math.Vector2 exposing (..)
 import Mouse
@@ -60,7 +61,7 @@ type alias Container =
   , capacity : Float
   , initialAmount : Float
   , position : Vec2
-  , rect : Rect
+  , radius : Float
   }
 
 type alias Resource =
@@ -77,8 +78,6 @@ type alias Jack =
   , position : Vec2
   , rect : Rect
   }
-
-type alias Physical a = { a | rect : Rect , position : Vec2 }
 
 type alias Rect = (Float, Float)
 
@@ -218,3 +217,14 @@ getGlobalTransform (model) =
 --dragOffset : { a | current : Mouse.Position, start : Mouse.Position } -> Vec2
 dragOffset {current, start} = vec2 (toFloat <| current.x - start.x) (toFloat <| current.y - start.y)
 
+
+-- IDs
+
+generateProcessID name =  -- TODO: prevent collision
+  110000000000 + FNV.hashString name
+
+generateJackID processName jackName jackDirection =
+  220000000000 + FNV.hashString (processName ++ jackName ++ (toString jackDirection))
+
+generateContainerID name =  -- TODO: prevent collision
+  440000000000 + FNV.hashString name

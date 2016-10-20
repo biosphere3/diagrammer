@@ -144,8 +144,7 @@ drawContainer model calc container =
   let
     backgroundColor = "orange"
     realPosition = toRecord <| getContainerPosition model container
-    (w, h) = container.rect
-    radius = w / 2 -- TODO
+    radius = container.radius
 
     amountDisplay =
       Dict.get container.id calc.containerByID

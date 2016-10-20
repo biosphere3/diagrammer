@@ -2,7 +2,6 @@ module Init exposing (..)
 
 
 import Dict exposing (Dict)
-import FNV
 import Math.Vector2 exposing (..)
 
 import List exposing (..)
@@ -85,7 +84,7 @@ parseProcessWithJacks ({inputs, outputs} as def) =
 
 parseProcess : ProcessDef -> Process
 parseProcess {name, excerpt, image} =
-  { id = 110000000000 + FNV.hashString name
+  { id = generateProcessID name
   , name = name
   , description = excerpt
   , imageURL = image
@@ -102,7 +101,7 @@ parseJack  process direction order {name, rate, units, per} =
       Input -> vec2 -180 y
       Output -> vec2 80 y
   in
-    { id = 220000000000 + FNV.hashString (process.name ++ name ++ (toString direction))
+    { id = generateJackID process.name name direction
     , name = name
     , processID = process.id
     , rate = rate
@@ -113,15 +112,15 @@ parseJack  process direction order {name, rate, units, per} =
 
 
 containers =
-  [ { id = FNV.hashString "Sun", name = "Sun", position = vec2 600 100}
+  [ { id = generateContainerID "Sun", name = "Sun", position = vec2 600 100}
   ]
 
 mkContainer : { a | name : String, position : Vec2 }  -> Container
 mkContainer {name, position} =
-  { id = (440000000000 + FNV.hashString name)
+  { id = generateContainerID name
   , name = name
   , position = position
-  , rect = (160, 160)
+  , radius = 100
   , capacity = 1/0
   , initialAmount = 1/0
   }
