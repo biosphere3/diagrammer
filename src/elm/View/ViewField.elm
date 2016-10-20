@@ -3,7 +3,7 @@ module View.ViewField exposing (..)
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
-import Html.Events exposing (on, onMouseEnter, onMouseLeave)
+import Html.Events exposing (on, onMouseEnter, onMouseLeave, onMouseUp)
 import Json.Decode as Json exposing ((:=), int, float, object4, object2)
 import Math.Vector2 exposing (..)
 import Mouse
@@ -106,17 +106,23 @@ drawJack model calc jack =
     jackCoords = toRecord <| getJackPosition model jack
     x0 = toString <| jackCoords.x
     y0 = toString <| jackCoords.y
+
+    isDragging = isDragSubjectID model jack.id  -- would rather not compute this every time
+
     outline =
-      Svg.path
+      Svg.path (
         [ onMouseDown' <| DragJack jack
+        , onMouseUp <| DragEndTargetJack jack
         , d <| Shape.chevron Shape.jackDimensions
         , Html.Attributes.style
             [ "cursor" => "move"
             , "fill" => "white"
             , "stroke" => "black"
             , "strokeWidth" => "2"
+            , "pointer-events" => if isDragging then "none" else "auto"  -- don't catch mouseUp while dragging
             ]
-        ] []
+        ])
+        []
     content = text'
       [x "50", alignmentBaseline "middle", textAnchor "middle"]
       [text <| jack.name ]
@@ -124,6 +130,14 @@ drawJack model calc jack =
     g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
       [ outline, content ]
 
+isDragSubjectID model id =
+  model.drag
+  |> Maybe.map (\drag ->
+    case drag.target of
+      DragJack dragJack -> dragJack.id == id
+      _ -> False
+    )
+  |> Maybe.withDefault False
 
 drawContainer : Model -> Calc -> Container -> Svg Msg
 drawContainer model calc container =
@@ -139,11 +153,14 @@ drawContainer model calc container =
 
     attrs =
       [ onMouseDown' <| DragContainer container
+      , onMouseUp <| DragEndTargetContainer container
       , fill backgroundColor
       , stroke "white"
       , xlinkHref "http://placekitten.com/400"
       , Html.Attributes.style
           [ "cursor" => "move"
+          , "pointer-events" =>
+              if (isDragSubjectID model container.id) then "none" else "auto"
           ]
       ] ++ rectAttrs container.rect realPosition
 

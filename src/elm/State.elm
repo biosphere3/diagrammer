@@ -19,6 +19,10 @@ type Msg
     = DragStart Draggable Mouse.Position
     | DragAt Mouse.Position
     | DragEnd Mouse.Position
+
+    | DragEndTargetJack Jack
+    | DragEndTargetContainer Container
+
     | MouseWheelTurn Mouse.Position (Int, Int) Float
 
     | SetEpoch Int
@@ -45,24 +49,84 @@ manageCache msg model =
       { model | calcCache = Dict.empty }
     recalc = calc << clear
   in case msg of
-    DragStart _ _         -> model
-    DragAt _              -> model
-    MouseWheelTurn _ _ _  -> model
-    Tick _                -> model
-    SetEpoch _            -> calc model
-    DragEnd _             -> recalc model
+    DragStart _ _             -> model
+    DragAt _                  -> model
+    MouseWheelTurn _ _ _      -> model
+    Tick _                    -> model
+    SetEpoch _                -> calc model
+    DragEnd _                 -> recalc model
+    DragEndTargetJack _       -> recalc model
+    DragEndTargetContainer _  -> recalc model
 
+
+connectJacks model dragJack jack =
+  let
+    jacks = [dragJack, jack]
+    newContainer =
+      let
+        newID = nextID model.containerByID
+        newPos = centroid <| List.map .position jacks
+        containerName = "(" ++ dragJack.name ++ ")"
+      in
+        { id = newID
+        , name = containerName
+        , position = newPos
+        , rect = (100, 100)
+        , capacity = 1/0
+        , initialAmount = 0
+        }
+
+    model' =
+      { model
+      | containerByID = Dict.insert newContainer.id newContainer model.containerByID
+      }
+    pairs : List (Container, Jack)
+    pairs = List.map ((,) newContainer) jacks
+
+    model'' = List.foldl
+      addLink
+      model'
+      pairs
+  in
+    model''
 
 updateHelp : Msg -> Model -> Model
 updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model) =
   let
     {getProcess, getJack, getContainer, getLink} = getGetters model
   in case msg of
+
     DragStart target xy ->
       { model | drag = (Just (Drag xy xy target)) }
 
+
     DragAt xy ->
       { model | drag = (Maybe.map (\{start, target} -> Drag start xy target) model.drag) }
+
+
+    DragEndTargetJack jack ->
+      case drag of
+        Just drag ->
+          case drag.target of
+            DragJack dragJack ->
+              connectJacks model dragJack jack
+            _ ->
+              model
+        Nothing ->
+          model
+
+
+    DragEndTargetContainer container ->
+      case drag of
+        Just drag ->
+          case drag.target of
+            DragJack dragJack ->
+              addLink (container, dragJack) model
+            _ ->
+              model
+        Nothing ->
+          model
+
 
     DragEnd _ ->
       case drag of
@@ -91,48 +155,8 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
               { model'
               | containerByID = containerByID |> Dict.update dragContainer.id (Maybe.map updateContainerPosition)
               }
-            DragJack dragJack ->
-              let
-                jackHits = jackCollisions model (updateJackPosition dragJack)
-                containerHit = jackContainerCollision model (updateJackPosition dragJack)
-              in
-                case containerHit of
-                  Just container ->
-                    addLink (container, dragJack) model'
-                  Nothing ->
-                    if List.length jackHits > 0
-                    then
-                      let
-                        jacks = (dragJack :: jackHits)
-                        newContainer =
-                          let
-                            newID = nextID model.containerByID
-                            newPos = centroid <| List.map .position jacks
-                            containerName = "(" ++ dragJack.name ++ ")"
-                          in
-                            { id = newID
-                            , name = containerName
-                            , position = newPos
-                            , rect = (100, 100)
-                            , capacity = 1/0
-                            , initialAmount = 0
-                            }
+            DragJack dragJack -> model'
 
-                        model'' =
-                          { model'
-                          | containerByID = Dict.insert newContainer.id newContainer containerByID
-                          }
-                        pairs : List (Container, Jack)
-                        pairs = List.map ((,) newContainer) jacks
-
-                        model''' = List.foldl
-                          addLink
-                          model''
-                          pairs
-                      in
-                        model'''
-                    else
-                      model'
 
     MouseWheelTurn position (width, height) delta ->
       let
@@ -140,10 +164,12 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
       in
         Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
 
+
     SetEpoch epoch ->
       { model
       | epoch = epoch
       }
+
 
     Tick t ->
       let
