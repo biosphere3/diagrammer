@@ -26,6 +26,10 @@ seize v d =
     Nothing -> (Debug.crash <| "Failed lookup: " ++ (toString v) ++ " of " ++ (toString d))
     Just ret -> ret
 
+fromJust ref m =
+  case m of
+    Just v -> v
+    Nothing -> Debug.crash ref
 
 updateMulti : List comparable -> (Maybe a -> Maybe a) -> Dict comparable a -> Dict comparable a
 updateMulti keys f dict =
@@ -53,6 +57,17 @@ repeat n v =
   in
     r [] (n, v)
 
+
+zip : List a -> List b -> List (a,b)
+zip xs ys =
+  case (xs, ys) of
+    ( x :: xs', y :: ys' ) ->
+        (x,y) :: zip xs' ys'
+
+    (_, _) ->
+        []
+
+
 -- VECTOR MATH ----------------------
 
 
@@ -62,3 +77,4 @@ centroid ps =
     n = toFloat <| List.length ps
   in
     scale (1.0 / n) sum
+

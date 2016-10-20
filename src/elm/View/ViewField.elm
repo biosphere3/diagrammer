@@ -15,6 +15,7 @@ import Maybe exposing (..)
 import Util exposing (..)
 import Model exposing (..)
 import Calc exposing (getCalc)
+import JackRouting
 import Shape
 import State exposing (Msg(..))
 
@@ -221,13 +222,14 @@ drawLink ({containerByID, jackByID} as model) calc link =
       Output -> "output"
 
     domID = "link-" ++ (toString link.id)
-    dval = ["M", cx, ",", cy, "L", jx, ",", jy] |> String.join " "
+    dval = JackRouting.linkPath model process container
     displayText =
       (String.toUpper jack.name) ++ " " ++ flowDisplay
 
     linkStripe =
       Svg.path
         [ d dval
+        , fill "none"
         , stroke color
         , strokeWidth "20"
         , id domID
@@ -238,6 +240,7 @@ drawLink ({containerByID, jackByID} as model) calc link =
     linkLine =
       Svg.path
         [ d dval
+        , fill "none"
         , stroke "white"
         , strokeWidth "5"
         , strokeDasharray "10,20"
