@@ -34,6 +34,9 @@ updateMulti keys f dict =
     dict
     keys
 
+fn2 : String -> a -> a -> String
+fn2 name x y =
+  "translate(" ++ (toString x) ++ "," ++ (toString y) ++ ")"
 
 px : Int -> String
 px number =

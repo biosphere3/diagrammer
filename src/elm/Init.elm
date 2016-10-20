@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import FNV
 import Math.Vector2 exposing (..)
 
+import List exposing (..)
 import Model exposing (..)
 import Shape
 import State exposing (Msg(..))
@@ -78,7 +79,7 @@ parseProcessWithJacks ({inputs, outputs} as def) =
     process = parseProcess def
     parseInput = parseJack process Input
     parseOutput = parseJack process Output
-    jacks = (List.map parseInput inputs) ++ (List.map parseOutput outputs)
+    jacks = (indexedMap parseInput inputs) ++ (indexedMap parseOutput outputs)
   in
     (process, jacks)
 
@@ -92,14 +93,16 @@ parseProcess {name, excerpt, image} =
   , rect = (160, 160)
   }
 
-parseJack : Process -> JackDirection -> JackDef -> Jack
-parseJack  process direction {name, rate, units, per} =
+parseJack : Process -> JackDirection -> Int -> JackDef -> Jack
+parseJack  process direction order {name, rate, units, per} =
   let
+    h = snd Shape.jackDimensions
+    y = toFloat <| h - h * order
     offset = case direction of
-      Input -> vec2 -200 50
-      Output -> vec2 120 50
+      Input -> vec2 -180 y
+      Output -> vec2 80 y
   in
-    { id = 220000000000 + FNV.hashString name
+    { id = 220000000000 + FNV.hashString (process.name ++ name ++ (toString direction))
     , name = name
     , processID = process.id
     , rate = rate

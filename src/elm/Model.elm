@@ -169,6 +169,7 @@ getJackProcess model jack =
   seize jack.processID model.processByID
 
 
+-- TODO: make the (loose) jack position entirely dependent on process position
 getJackPosition : Model -> Jack -> Vec2
 getJackPosition {drag, processByID} {id, position, processID} =
   let

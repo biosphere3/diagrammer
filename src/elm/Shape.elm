@@ -2,12 +2,12 @@ module Shape exposing (..)
 
 import String
 
-jackDimensions = (100, 50)
+jackDimensions = (130, 60)
 
 chevron : (Float, Float) -> String
 chevron (width, height) =
   let
-    angle = degrees 60
+    angle = degrees <| 60
     dy = height / 2
     dx = -dy / tan angle
     ts = toString

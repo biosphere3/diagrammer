@@ -27,8 +27,6 @@ view model =
     (gx, gy) = toTuple <| .translate <| xf
     scale = .scale <| xf
     (calc, _) = getCalc model
-
-    looseJacks = model.jackByID |> Dict.values |> List.filter (not << isConnected model)
   in
     Svg.svg
       [ width "100%"
@@ -41,7 +39,6 @@ view model =
         [ Svg.g [] (model.linkByID |> Dict.values |> List.map (drawLink model calc))
         , Svg.g [] (model.processByID |> Dict.values |> List.map (drawProcess model calc))
         , Svg.g [] (model.containerByID |> Dict.values |> List.map (drawContainer model calc))
-        , Svg.g [] (looseJacks |> List.map (drawJack model calc))
         ]
       ]
 
@@ -49,22 +46,26 @@ view model =
 drawProcess : Model -> Calc -> Process -> Svg Msg
 drawProcess model calc process =
   let
-    backgroundColor = "cornflowerblue"
-    realPosition = getProcessPosition model process
+    realPosition = toRecord <| getProcessPosition model process
     (w, h) = process.rect
     imageURL = process.imageURL |> withDefault ("http://placekitten.com/" ++ toString w ++ "/" ++ toString h)
 
+    jacks = getJacksByProcessID model process.id
+    looseJacks = jacks |> List.filter (not << isConnected model)
+
     attrs =
       [ onMouseDown' <| DragProcess process
-      , fill backgroundColor
-      , stroke "white"
       , rx "10"
       , ry "10"
+      , x (toString <| -w / 2)
+      , y (toString <| -h / 2)
+      , width (toString w)
+      , height (toString h)
       , xlinkHref <| imageURL
       , Html.Attributes.style
           [ "cursor" => "move"
           ]
-      ] ++ rectAttrs process.rect realPosition
+      ]
 
     headAttrs =
       [ width (toString w)
@@ -72,15 +73,15 @@ drawProcess model calc process =
       ]
 
     textAttrs = headAttrs ++
-      [ x (toString <| (getX realPosition))
-      , y (toString <| (getY realPosition) - 90)
+      [ x (toString <| 0)
+      , y (toString <| 0 - 90)
       , fontSize "20px"
       , textAnchor "middle"
       ]
 
     boxAttrs = headAttrs ++
-      [ x (toString <| (getX realPosition) - 80)
-      , y (toString <| (getY realPosition) - 120)
+      [ x (toString <| 0 - 80)
+      , y (toString <| 0 - 120)
       , fill "white"
       , stroke "#ddd"
       , strokeWidth "1px"
@@ -92,8 +93,36 @@ drawProcess model calc process =
     head = g [] [textBox, textContent]
   in
     g []
-      [ head
-      , body ]
+      [ g [ transform <| fn2 "transform" realPosition.x realPosition.y ]
+        [ head
+        , body
+        ]
+      , g [] (looseJacks |> List.map (drawJack model calc))
+      ]
+
+drawJack : Model -> Calc -> Jack -> Svg Msg
+drawJack model calc jack =
+  let
+    jackCoords = toRecord <| getJackPosition model jack
+    x0 = toString <| jackCoords.x
+    y0 = toString <| jackCoords.y
+    outline =
+      Svg.path
+        [ onMouseDown' <| DragJack jack
+        , d <| Shape.chevron Shape.jackDimensions
+        , Html.Attributes.style
+            [ "cursor" => "move"
+            , "fill" => "white"
+            , "stroke" => "black"
+            , "strokeWidth" => "2"
+            ]
+        ] []
+    content = text'
+      [x "50", alignmentBaseline "middle", textAnchor "middle"]
+      [text <| jack.name ]
+  in
+    g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
+      [ outline, content ]
 
 
 drawContainer : Model -> Calc -> Container -> Svg Msg
@@ -129,30 +158,6 @@ drawContainer model calc container =
       [ rect attrs []
       , text' textAttrs [text displayText]
       ]
-
-drawJack : Model -> Calc -> Jack -> Svg Msg
-drawJack model calc jack =
-  let
-    jackCoords = toRecord <| getJackPosition model jack
-    x0 = toString <| jackCoords.x
-    y0 = toString <| jackCoords.y
-    outline =
-      Svg.path
-        [ onMouseDown' <| DragJack jack
-        , d <| Shape.chevron Shape.jackDimensions
-        , Html.Attributes.style
-            [ "cursor" => "move"
-            , "fill" => "white"
-            , "stroke" => "black"
-            , "strokeWidth" => "3"
-            ]
-        ] []
-    content = text'
-      [x "20", alignmentBaseline "middle"]
-      [text <| jack.name ]
-  in
-    g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
-      [ outline, content ]
 
 drawLink : Model -> Calc -> Link -> Svg Msg
 drawLink ({containerByID, jackByID} as model) calc link =
