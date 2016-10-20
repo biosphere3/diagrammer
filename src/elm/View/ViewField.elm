@@ -143,7 +143,10 @@ drawContainer : Model -> Calc -> Container -> Svg Msg
 drawContainer model calc container =
   let
     backgroundColor = "orange"
-    realPosition = getContainerPosition model container
+    realPosition = toRecord <| getContainerPosition model container
+    (w, h) = container.rect
+    radius = w / 2 -- TODO
+
     amountDisplay =
       Dict.get container.id calc.containerByID
       |> Maybe.map (toString << .amount)
@@ -154,6 +157,9 @@ drawContainer model calc container =
     attrs =
       [ onMouseDown' <| DragContainer container
       , onMouseUp <| DragEndTargetContainer container
+      , cx "0"
+      , cy "0"
+      , r (toString <| radius)
       , fill backgroundColor
       , stroke "white"
       , xlinkHref "http://placekitten.com/400"
@@ -162,17 +168,18 @@ drawContainer model calc container =
           , "pointer-events" =>
               if (isDragSubjectID model container.id) then "none" else "auto"
           ]
-      ] ++ rectAttrs container.rect realPosition
+      ]
 
     textAttrs =
       [ fontSize "20px"
-      , x (toString <| getX realPosition)
-      , y (toString <| getY realPosition)
+      , x "0"
+      , y "0"
       , textAnchor "middle"
+      , alignmentBaseline "middle"
       ]
   in
-    g []
-      [ rect attrs []
+    g [ transform <| fn2 "translate" realPosition.x realPosition.y ]
+      [ circle attrs []
       , text' textAttrs [text displayText]
       ]
 
