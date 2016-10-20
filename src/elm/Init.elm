@@ -105,6 +105,7 @@ parseJack  process direction order {name, rate, units, per, state} =
       "liquid" -> LiquidState
       "gas" -> GasState
       "energy" -> EnergyState
+      "light" -> LightState
       _ -> UnspecifiedState
   in
     { id = generateJackID process.name name direction

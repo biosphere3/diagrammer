@@ -125,7 +125,7 @@ processes:
         units: Gal
         per: Hour
       - name: Sunlight
-        state: energy
+        state: light
         temp: null
         rate: 4
         units: kwh/m3
@@ -251,7 +251,7 @@ processes:
     image: http://www.thesolarbiz.com/Suniva.jpg
     inputs:
       - name: Sunlight
-        state: energy
+        state: light
         temp: null
         rate: 5.5
         units: kwh/m2
