@@ -32,6 +32,9 @@ view model =
       [ width "100%"
       , height "100%"
       , onMouseWheel'
+      , Html.Attributes.style
+        [ "background" => "#ddd"
+        ]
       ]
       [ Svg.g
         [ transform <| " scale(" ++ (toString scale) ++ ")" ++ "translate( " ++ (toString gx) ++ "," ++ (toString gy) ++ " )"
@@ -109,6 +112,8 @@ drawJack model calc jack =
 
     isDragging = isDragSubjectID model jack.id  -- would rather not compute this every time
 
+    color = getStateColor jack.matterState
+
     outline =
       Svg.path (
         [ onMouseDown' <| DragJack jack
@@ -116,16 +121,20 @@ drawJack model calc jack =
         , d <| Shape.chevron Shape.jackDimensions
         , Html.Attributes.style
             [ "cursor" => "move"
-            , "fill" => "white"
-            , "stroke" => "black"
-            , "strokeWidth" => "2"
+            , "fill" => color
+            , "stroke" => "#ddd"
+            , "strokeWidth" => "1"
             , "pointer-events" => if isDragging then "none" else "auto"  -- don't catch mouseUp while dragging
             ]
         ])
         []
     content = text'
-      [x "50", alignmentBaseline "middle", textAnchor "middle"]
-      [text <| jack.name ]
+      [ x "50"
+      , alignmentBaseline "middle"
+      , textAnchor "middle"
+      , fill "white"
+      ]
+      [ text <| jack.name ]
   in
     g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
       [ outline, content ]
@@ -142,7 +151,6 @@ isDragSubjectID model id =
 drawContainer : Model -> Calc -> Container -> Svg Msg
 drawContainer model calc container =
   let
-    backgroundColor = "orange"
     realPosition = toRecord <| getContainerPosition model container
     radius = container.radius
 
@@ -159,8 +167,9 @@ drawContainer model calc container =
       , cx "0"
       , cy "0"
       , r (toString <| radius)
-      , fill backgroundColor
-      , stroke "white"
+      , fill "white"
+      , stroke "black"
+      , strokeWidth "3"
       , xlinkHref "http://placekitten.com/400"
       , Html.Attributes.style
           [ "cursor" => "move"
@@ -173,6 +182,7 @@ drawContainer model calc container =
       [ fontSize "20px"
       , x "0"
       , y "0"
+      , fill "black"
       , textAnchor "middle"
       , alignmentBaseline "middle"
       ]
@@ -200,9 +210,7 @@ drawLink ({containerByID, jackByID} as model) calc link =
       |> map (toString << .flow)
       |> withDefault "???"
 
-    color = case jack.direction of
-      Input -> "#008800"
-      Output -> "#004400"
+    color = getStateColor jack.matterState
 
     arrowText = case jack.direction of
       Input -> "  ❯ ❯ ❯  "
@@ -263,6 +271,17 @@ drawLink ({containerByID, jackByID} as model) calc link =
       ]
 
 
+getStateColor : MatterState -> String
+getStateColor state =
+  case state of
+    SolidState -> "green"
+    LiquidState -> "blue"
+    GasState -> "orange"
+    EnergyState -> "red"
+    LightState -> "yellow"
+    UnspecifiedState -> "gray"
+
+
 isConnected : Model -> Jack -> Bool
 isConnected model jack =
   let
@@ -271,17 +290,6 @@ isConnected model jack =
     case link of
       Just _ -> True
       Nothing -> False
-
-rectAttrs : Rect -> Vec2 -> List (Svg.Attribute Msg)
-rectAttrs (w, h) position =
-  let
-    pos = position `sub` (vec2 (w / 2) (h / 2))
-  in
-    [ x ((getX pos) |> toString)
-    , y ((getY pos) |> toString)
-    , width (w |> toString)
-    , height (h |> toString)
-    ]
 
 
 onMouseDown' : Draggable -> Attribute Msg

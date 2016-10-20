@@ -30,7 +30,7 @@ type alias JackDef =
   , rate : Float
   , units : String
   , per : String
-  --, state : Maybe String
+  , state : String
   }
 
 
@@ -93,13 +93,19 @@ parseProcess {name, excerpt, image} =
   }
 
 parseJack : Process -> JackDirection -> Int -> JackDef -> Jack
-parseJack  process direction order {name, rate, units, per} =
+parseJack  process direction order {name, rate, units, per, state} =
   let
     h = snd Shape.jackDimensions
     y = toFloat <| h - h * order
     offset = case direction of
       Input -> vec2 -180 y
       Output -> vec2 80 y
+    matterState = case state of
+      "solid" -> SolidState
+      "liquid" -> LiquidState
+      "gas" -> GasState
+      "energy" -> EnergyState
+      _ -> UnspecifiedState
   in
     { id = generateJackID process.name name direction
     , name = name
@@ -108,6 +114,7 @@ parseJack  process direction order {name, rate, units, per} =
     , direction = direction
     , position = process.position `add` offset
     , rect = Shape.jackDimensions
+    , matterState = matterState
     }
 
 

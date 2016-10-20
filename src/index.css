@@ -2,6 +2,9 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: "Helvetica", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
 }
 
 #main, #main > div {

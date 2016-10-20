@@ -77,6 +77,7 @@ type alias Jack =
   , direction : JackDirection
   , position : Vec2
   , rect : Rect
+  , matterState : MatterState
   }
 
 type alias Rect = (Float, Float)
@@ -92,7 +93,12 @@ type Draggable = DragProcess Process
                | DragContainer Container
                | DragScreen
 
-type MatterState = Solid | Liquid | Gas | Plasma
+type MatterState = SolidState
+                 | LiquidState
+                 | GasState
+                 | EnergyState
+                 | LightState
+                 | UnspecifiedState
 
 type JackDirection = Input | Output
 
