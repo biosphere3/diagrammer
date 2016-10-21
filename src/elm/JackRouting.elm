@@ -13,15 +13,29 @@ type Face = East
           | West
           | North
 
+type Axis = AxisX | AxisY
 
-type alias OrthogonalPlan =
-    { distance : Float
+type alias OrthoPlan =
+    { distanceSquared : Float
     , faces : (Face, Face)
     , contacts : (Vec2, Vec2)
     }
 
 type alias Thing = (Shape, Vec2)
 
+axis face =
+    case face of
+        West -> AxisX
+        East -> AxisX
+        North -> AxisY
+        South -> AxisY
+
+{- Order of operations:
+    1. find the (Face, Face) part of the plan
+    2. for each Face, for each Link, adjust the contact point based on how many other links are attached to this face
+        - This looks like sorting links based on their straight-line angle from the central contact point
+    3. draw all them Links!
+-}
 
 linkPath model process container =
     let
@@ -30,20 +44,51 @@ linkPath model process container =
         processShape = Shape.getProcessShape process
         containerShape = Shape.getContainerShape container
         plan =
-            orthogonalPlan
+            orthoPlan
                 (processShape, processPosition)
                 (containerShape, containerPosition)
         (contact1, contact2) = plan.contacts
         (px, py) = toTuple contact1
         (cx, cy) = toTuple contact2
     in
-        [ "M", pair px py
-        --, "L", pair cx py
-        , "L", pair cx cy
-        ] |> String.join " "
+        orthoRoute plan
 
-orthogonalPlan : Thing -> Thing -> OrthogonalPlan
-orthogonalPlan ((shape1, position1) as thing1) ((shape2, position2) as thing2) =
+orthoRoute : OrthoPlan -> String
+orthoRoute plan =
+    let
+        (face1, face2) = plan.faces
+        (contact1, contact2) = plan.contacts
+        (px, py) = toTuple contact1
+        (cx, cy) = toTuple contact2
+        points =
+            [ (px, py) ] ++ inflectionPoints plan ++ [ (cx, cy) ]
+        items = points |> List.map pair |> List.intersperse "L" |> ((::) "M")
+    in
+        String.join " " items
+
+inflectionPoints plan =
+    let
+        ((px, py), (cx, cy)) = tupmap2 toTuple plan.contacts
+        axes = tupmap2 axis plan.faces
+        hx = (cx + px) / 2
+        hy = (cy + py) / 2
+    in
+        case axes of
+            (AxisX, AxisY) ->
+                [ (cx, py) ]
+            (AxisY, AxisX) ->
+                [ (px, cy) ]
+            (AxisX, AxisX) ->
+                [ (hx, py)
+                , (hx, cy)
+                ]
+            (AxisY, AxisY) ->
+                [ (px, hy)
+                , (cx, hy)
+                ]
+
+orthoPlan : Thing -> Thing -> OrthoPlan
+orthoPlan ((shape1, position1) as thing1) ((shape2, position2) as thing2) =
     let
         getOffset1 = faceOffset shape1
         getOffset2 = faceOffset shape2
@@ -51,14 +96,14 @@ orthogonalPlan ((shape1, position1) as thing1) ((shape2, position2) as thing2) =
             let
                 p1 = (contactPoint thing1 f1)
                 p2 = (contactPoint thing2 f2)
-                d = distance p1 p2
+                d = distanceSquared p1 p2
             in
-                OrthogonalPlan d (f1, f2) (p1, p2)
+                OrthoPlan d (f1, f2) (p1, p2)
 
         bestPlan =
             possibleFacePairs position1 position2
             |> List.map getPlan
-            |> List.sortBy .distance
+            |> List.sortBy .distanceSquared
             |> List.head
             |> fromJust "no plan"
     in
@@ -103,5 +148,5 @@ contactPoint : (Shape, Vec2) -> Face -> Vec2
 contactPoint (shape, position) face =
     position `add` (faceOffset shape face)
 
-pair x y =
+pair (x, y) =
     (toString x) ++ "," ++ (toString y)
