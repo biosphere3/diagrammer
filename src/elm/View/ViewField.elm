@@ -168,19 +168,25 @@ drawContainer model calc container =
   let
     realPosition = toRecord <| getContainerPosition model container
     radius = container.radius
+    stringOrInf amount =
+      if isInfinite amount
+      then "∞"
+      else toString (round amount)  -- TODO: don't round, just limit sigfigs
+
+    amount = Dict.get container.id calc.containerByID |> Maybe.map .amount
 
     amountDisplay =
-      let
-        show amount =
-          if isInfinite amount
-          then "∞"
-          else toString amount
-      in
-        Dict.get container.id calc.containerByID
-        |> Maybe.map (show << .amount)
-        |> Maybe.withDefault "???"
+      amount
+      |> Maybe.map stringOrInf
+      |> Maybe.withDefault "???"
 
-    displayText = container.name ++ " " ++ amountDisplay
+    capacityDisplay =
+      (stringOrInf container.capacity)
+
+    circleColor =
+      case amount of
+        Just val -> if val < 0 then colors.death else "white"
+        Nothing -> "white"
 
     attrs =
       [ onMouseDown' <| DragContainer container
@@ -188,7 +194,7 @@ drawContainer model calc container =
       , cx "0"
       , cy "0"
       , r (toString <| radius)
-      , fill "white"
+      , fill circleColor
       , stroke "black"
       , strokeWidth "3"
       , xlinkHref "http://placekitten.com/400"
@@ -209,7 +215,8 @@ drawContainer model calc container =
 
     nameAttrs = textAttrs ++ [y "-10", fontSize "20px"]
     amountAttrs = textAttrs ++ [y "15", fontSize "24px"]
-
+    capacityAttrs = textAttrs ++ [y "38", fontSize "16px", fill "#666"]
+    dividerAttrs = [x1 "-20", x2 "20", y1 "27", y2 "27", stroke "#666"]
   in
     g [ transform <| fn2 "translate" realPosition.x realPosition.y
       , onDoubleClick (RemoveContainer container)
@@ -217,6 +224,8 @@ drawContainer model calc container =
       [ circle attrs []
       , text' nameAttrs [text container.name]
       , text' amountAttrs [text amountDisplay]
+      , line dividerAttrs []
+      , text' capacityAttrs [text capacityDisplay]
       ]
 
 drawLink : Model -> Calc -> Link -> Svg Msg

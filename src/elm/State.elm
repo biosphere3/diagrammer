@@ -16,6 +16,8 @@ import Util exposing (..)
 textOffsetRate = 1.0
 simulationTickInterval = 100 * millisecond
 
+hardcodedContainerCapacity = 1000
+
 type Msg
     = DragStart Draggable Mouse.Position
     | DragAt Mouse.Position
@@ -87,7 +89,7 @@ connectJacks model dragJack jack =
         , name = containerName
         , position = newPos
         , radius = 62
-        , capacity = 1/0
+        , capacity = hardcodedContainerCapacity
         , initialAmount = 0
         }
 
