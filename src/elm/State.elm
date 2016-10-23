@@ -24,6 +24,8 @@ type Msg
     | DragEndTargetJack Jack
     | DragEndTargetContainer Container
 
+    | RemoveLink Link
+
     | MouseWheelTurn Mouse.Position (Int, Int) Float
 
     | SetEpoch Int
@@ -68,6 +70,7 @@ manageCache msg model =
     DragEnd _                 -> recalc model
     DragEndTargetJack _       -> recalc model
     DragEndTargetContainer _  -> recalc model
+    RemoveLink _              -> recalc model
 
 
 connectJacks model dragJack jack =
@@ -168,6 +171,9 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
             DragJack dragJack -> model'
 
 
+    RemoveLink link ->
+      removeLink link model
+
     MouseWheelTurn position (width, height) delta ->
       let
         ratio = Debug.log "delta" <| 1 + delta / 100
@@ -248,6 +254,16 @@ addLink' (container, jack) model =
 
 addLink : (Container, Jack) -> Model -> Model
 addLink pair model = fst <| addLink' pair model
+
+removeLink : Link -> Model -> Model
+removeLink link model =
+  { model
+  | linkByID = model.linkByID |> Dict.filter (\id _ -> not (id == link.id))
+  }
+
+linksEqual : Link -> Link -> Bool
+linksEqual a b =
+  (a.jackID, a.containerID) == (b.jackID, b.containerID)
 
 -- SUBSCRIPTIONS
 

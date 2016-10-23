@@ -3,7 +3,7 @@ module View.ViewField exposing (..)
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
-import Html.Events exposing (on, onMouseEnter, onMouseLeave, onMouseUp)
+import Html.Events exposing (on, onMouseEnter, onMouseLeave, onMouseUp, onDoubleClick)
 import Json.Decode as Json exposing ((:=), int, float, object4, object2)
 import Math.Vector2 exposing (..)
 import Mouse
@@ -281,6 +281,7 @@ drawLink ({containerByID, jackByID} as model) calc link =
 
   in
     g [ class <| "link " ++ linkClass
+      , onDoubleClick (RemoveLink link)
       ]
       [ linkStripe
       , linkLine
