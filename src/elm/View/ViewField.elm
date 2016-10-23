@@ -169,9 +169,15 @@ drawContainer model calc container =
     radius = container.radius
 
     amountDisplay =
-      Dict.get container.id calc.containerByID
-      |> Maybe.map (toString << .amount)
-      |> Maybe.withDefault "???"
+      let
+        show amount =
+          if isInfinite amount
+          then "∞"
+          else toString amount
+      in
+        Dict.get container.id calc.containerByID
+        |> Maybe.map (show << .amount)
+        |> Maybe.withDefault "???"
 
     displayText = container.name ++ " " ++ amountDisplay
 
@@ -195,16 +201,21 @@ drawContainer model calc container =
     textAttrs =
       [ fontSize "20px"
       , x "0"
-      , y "0"
       , fill "black"
       , textAnchor "middle"
       , alignmentBaseline "middle"
       ]
+
+    nameAttrs = textAttrs ++ [y "-10", fontSize "20px"]
+    amountAttrs = textAttrs ++ [y "15", fontSize "24px"]
+
   in
     g [ transform <| fn2 "translate" realPosition.x realPosition.y
-      , onDoubleClick (RemoveContainer container) ]
+      , onDoubleClick (RemoveContainer container)
+      ]
       [ circle attrs []
-      , text' textAttrs [text displayText]
+      , text' nameAttrs [text container.name]
+      , text' amountAttrs [text amountDisplay]
       ]
 
 drawLink : Model -> Calc -> Link -> Svg Msg
