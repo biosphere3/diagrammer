@@ -122,13 +122,19 @@ drawProcess model calc process =
 
         head =
             g [] [ textBox, textContent ]
+
+        drawnJacks =
+            if model.playing then
+                []
+            else
+                (looseJacks |> List.map (drawJack model calc))
     in
         g []
             [ g [ transform <| fn2 "transform" realPosition.x realPosition.y ]
                 [ head
                 , body
                 ]
-            , g [] (looseJacks |> List.map (drawJack model calc))
+            , g [] drawnJacks
             ]
 
 
