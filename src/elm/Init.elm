@@ -37,14 +37,12 @@ type alias JackDef =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
   let
-
-    (processes, jacks) =
+    (processes, jacks, num) =
       let
-        step : ProcessDef -> (List Process, List Jack) -> (List Process, List Jack)
-        step def (ps, js) =
-          parseProcessWithJacks def |> \(p, js') -> (p :: ps, js ++ js')
+        step def (ps, js, i) =
+          (parseProcessWithJacks i def) |> \(p, js') -> (p :: ps, js ++ js', i + 1)
       in
-        List.foldl step ([], []) flags.library.processes
+        List.foldl step ([], [], 0) flags.library.processes
 
     processByID : ProcessDict
     processByID = processes |> toDictByID
@@ -72,25 +70,29 @@ init flags =
       , Cmd.none
     )
 
-parseProcessWithJacks : ProcessDef -> (Process, List Jack)
-parseProcessWithJacks ({inputs, outputs} as def) =
+parseProcessWithJacks : Int -> ProcessDef -> (Process, List Jack)
+parseProcessWithJacks n ({inputs, outputs} as def) =
   let
-    process = parseProcess def
+    process = parseProcess n def
     parseInput = parseJack process Input
     parseOutput = parseJack process Output
     jacks = (indexedMap parseInput inputs) ++ (indexedMap parseOutput outputs)
   in
     (process, jacks)
 
-parseProcess : ProcessDef -> Process
-parseProcess {name, excerpt, image} =
-  { id = generateProcessID name
-  , name = name
-  , description = excerpt
-  , imageURL = image
-  , position = vec2 200 200
-  , rect = (160, 160)
-  }
+parseProcess : Int -> ProcessDef -> Process
+parseProcess n {name, excerpt, image} =
+  let
+    x = if n % 2 == 0 then -600 else -200
+    y = (-600 + (toFloat n) * 150)
+  in
+    { id = generateProcessID name
+    , name = name
+    , description = excerpt
+    , imageURL = image
+    , position = vec2 x y
+    , rect = (160, 160)
+    }
 
 parseJack : Process -> JackDirection -> Int -> JackDef -> Jack
 parseJack  process direction order {name, rate, units, per, state} =
