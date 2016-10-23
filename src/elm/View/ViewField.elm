@@ -188,8 +188,12 @@ drawContainer model calc container =
         Just val -> if val < 0 then colors.death else "white"
         Nothing -> "white"
 
+    clipID = "container-clip-" ++ (toString container.id)
+    circleID = "container-circle-" ++ (toString container.id)
+
     attrs =
-      [ onMouseDown' <| DragContainer container
+      [ id circleID
+      , onMouseDown' <| DragContainer container
       , onMouseUp <| DragEndTargetContainer container
       , cx "0"
       , cy "0"
@@ -205,6 +209,22 @@ drawContainer model calc container =
           ]
       ]
 
+    fillRatio =
+      if isInfinite container.capacity
+      then 0
+      else
+        amount |> Maybe.map (\a -> a / container.capacity) |> withDefault 0
+    fillHeight = radius * 2 * fillRatio
+
+    rectAttrs =
+      [ x <| toString (-radius)
+      , y <| toString (radius - fillHeight)
+      , width "500"
+      , height <| toString fillHeight
+      , fill "#ddd"
+      , Svg.Attributes.clipPath <| "url(#" ++ clipID ++ ")"
+      ]
+
     textAttrs =
       [ fontSize "20px"
       , x "0"
@@ -217,11 +237,14 @@ drawContainer model calc container =
     amountAttrs = textAttrs ++ [y "15", fontSize "24px"]
     capacityAttrs = textAttrs ++ [y "38", fontSize "16px", fill "#666"]
     dividerAttrs = [x1 "-20", x2 "20", y1 "27", y2 "27", stroke "#666"]
+
   in
     g [ transform <| fn2 "translate" realPosition.x realPosition.y
       , onDoubleClick (RemoveContainer container)
       ]
-      [ circle attrs []
+      [ Svg.clipPath [id clipID] [use [xlinkHref <| "#" ++ circleID] []]
+      , circle attrs []
+      , rect rectAttrs []
       , text' nameAttrs [text container.name]
       , text' amountAttrs [text amountDisplay]
       , line dividerAttrs []
