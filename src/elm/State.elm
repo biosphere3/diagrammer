@@ -14,6 +14,7 @@ import Util exposing (..)
 
 
 textOffsetRate = 1.0
+simulationTickInterval = 100 * millisecond
 
 type Msg
     = DragStart Draggable Mouse.Position
@@ -26,8 +27,10 @@ type Msg
     | MouseWheelTurn Mouse.Position (Int, Int) Float
 
     | SetEpoch Int
+    | SetPlaying Bool
 
-    | Tick Time
+    | TickAnimation Time
+    | TickSimulation Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,16 +47,24 @@ manageCache : Msg -> Model -> Model
 manageCache msg model =
   let
     calc model =
-      { model | calcCache = snd <| Calc.getCalc model }
+      { model
+      | calcCache = snd <| Calc.getCalc model
+      }
     clear model =
-      { model | calcCache = Dict.empty }
+      { model
+      | calcCache = Dict.empty
+      }
     recalc = calc << clear
   in case msg of
     DragStart _ _             -> model
     DragAt _                  -> model
     MouseWheelTurn _ _ _      -> model
-    Tick _                    -> model
+    TickAnimation _           -> model
+    TickSimulation _          -> model
+    SetPlaying _              -> model
+
     SetEpoch _                -> calc model
+
     DragEnd _                 -> recalc model
     DragEndTargetJack _       -> recalc model
     DragEndTargetContainer _  -> recalc model
@@ -164,13 +175,29 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
         Focus.update globalTransform (\xf -> {xf | scale = xf.scale * ratio}) model
 
 
+    SetPlaying playing ->
+      { model | playing = playing }
+
+
     SetEpoch epoch ->
       { model
       | epoch = epoch
       }
 
+    TickSimulation t ->
+      if not model.playing
+      then model
+      else
+        let
+          next = updateHelp (SetEpoch (model.epoch + 1)) model
+        in
+          if isValidSimulationState next
+          then next
+          else
+            updateHelp (SetPlaying False) model
 
-    Tick t ->
+
+    TickAnimation t ->
       let
         rate jack = case jack.direction of
           Input -> -textOffsetRate
@@ -184,6 +211,26 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
       in
         { model | linkByID = linkByID' }
 
+
+--getHuman model =
+--  model.processByID
+--  |> List.filter \p -> p.name == "Human"
+--  |> List.head
+--
+--isValidSimulationState model calc =
+--  case getHuman model of
+--    Nothing -> True
+--    Just human ->
+--      let
+--        inputs = getJacksByProcessID human.id |> List.filter (\j -> j.direction == Input)
+--        flows =
+--          calc.jackByID
+--          |> Dict.filter (\id _ -> List.member id (List.map .id inputs))
+--          |> Dict.map (\id jack ->)
+--          |> List.filter (\{jackID} -> List.member jackID (List.map .id inputs))
+
+isValidSimulationState model =
+  model.epoch <= 100
 
 addLink' : (Container, Jack) -> Model -> (Model, Link)
 addLink' (container, jack) model =
@@ -216,11 +263,12 @@ subscriptions model =
         Just _ -> Sub.batch
           [ Mouse.moves DragAt
           , Mouse.ups DragEnd ]
-    ticking = every (33 * millisecond) Tick
+    ticking = every (33 * millisecond) TickAnimation
+    simTick = every simulationTickInterval TickSimulation
   in
     Sub.batch
       [ dragging
-      --, ticking
+      , simTick
       ]
 
 

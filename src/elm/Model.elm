@@ -17,6 +17,7 @@ type alias Model =
 
   -- time
   , epoch : Int
+  , playing : Bool
 
   -- calc
   , calcCache : CalcCache
@@ -118,9 +119,11 @@ type alias Calc =
 
 type alias CalcCache = Dict Int Calc
 
-type alias JackCalc = { flow : Float }
+type alias JackCalc =
+  { flow : Float }
 
-type alias ContainerCalc = { amount : Float }
+type alias ContainerCalc =
+  { amount : Float }
 
 
 getProcessPosition : Model -> Process -> Vec2

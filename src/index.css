@@ -48,3 +48,11 @@ g.link.input .link-line {
     0% { stroke-dashoffset: 0; }
     100% { stroke-dashoffset: 30px; }
 }
+
+
+.time-control button {
+  font-size: 24px;
+  background: none;
+  border: none;
+  margin: auto 3px;
+}
