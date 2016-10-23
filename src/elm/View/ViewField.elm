@@ -260,8 +260,6 @@ drawContainer model calc container =
 
         attrs =
             [ id circleID
-            , onMouseDown' <| DragContainer container
-            , onMouseUp <| DragEndTargetContainer container
             , cx "0"
             , cy "0"
             , r (toString <| radius)
@@ -269,14 +267,6 @@ drawContainer model calc container =
             , stroke "black"
             , strokeWidth "3"
             , xlinkHref "http://placekitten.com/400"
-            , Html.Attributes.style
-                [ "cursor" => "move"
-                , "pointer-events"
-                    => if (isDragSubjectID model container.id) then
-                        "none"
-                       else
-                        "auto"
-                ]
             ]
 
         fillRatio =
@@ -320,6 +310,16 @@ drawContainer model calc container =
         g
             [ transform <| fn2 "translate" realPosition.x realPosition.y
             , onDoubleClick (RemoveContainer container)
+            , onMouseDown' <| DragContainer container
+            , onMouseUp <| DragEndTargetContainer container
+            , Html.Attributes.style
+                [ "cursor" => "move"
+                , "pointer-events"
+                    => if (isDragSubjectID model container.id) then
+                        "none"
+                       else
+                        "auto"
+                ]
             ]
             [ Svg.clipPath [ id clipID ] [ use [ xlinkHref <| "#" ++ circleID ] [] ]
             , circle attrs []
