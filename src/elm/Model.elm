@@ -75,6 +75,7 @@ type alias Jack =
   , name : String
   , processID : ID
   , rate : Float -- the potential amount of flow, TODO: needs to be a function
+  , units : String
   , direction : JackDirection
   , position : Vec2
   , rect : Rect

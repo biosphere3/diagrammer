@@ -110,6 +110,7 @@ drawJack model calc jack =
     jackCoords = toRecord <| getJackPosition model jack
     x0 = toString <| jackCoords.x
     y0 = toString <| jackCoords.y
+    (w, h) = jack.rect
 
     isDragging = isDragSubjectID model jack.id  -- would rather not compute this every time
 
@@ -129,16 +130,28 @@ drawJack model calc jack =
             ]
         ])
         []
-    content = text'
-      [ x "50"
+
+    contentName = text'
+      [ x <| toString (w / 2 - 10)
+      , y <| toString (-h / 5)
+      , alignmentBaseline "middle"
+      , textAnchor "middle"
+      , fill "white"
+      , fontSize "20px"
+      ]
+      [ text <| jack.name ]
+
+    contentQuantity = text'
+      [ x <| toString (w / 2 - 10)
+      , y <| toString (h / 5)
       , alignmentBaseline "middle"
       , textAnchor "middle"
       , fill "white"
       ]
-      [ text <| jack.name ]
+      [ text <| toString jack.rate ++ " " ++ jack.units ]
   in
     g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")"]
-      [ outline, content ]
+      [ outline, contentName, contentQuantity ]
 
 isDragSubjectID model id =
   model.drag
@@ -215,8 +228,8 @@ drawLink ({containerByID, jackByID} as model) calc link =
     textColor = getStateContrastColor jack.matterState
 
     arrowText = case jack.direction of
-      Input -> "  ❯ ❯ ❯  "
-      Output -> "  ❮ ❮ ❮  "
+      Input -> "   ❮ ❮ ❮   "
+      Output -> "  ❯ ❯ ❯   "
 
     linkClass = case jack.direction of
       Input -> "input"
@@ -225,7 +238,7 @@ drawLink ({containerByID, jackByID} as model) calc link =
     domID = "link-" ++ (toString link.id)
     dval = JackRouting.linkPath model process container
     displayText =
-      (String.toUpper jack.name) ++ " " ++ flowDisplay
+      (String.toUpper jack.name) ++ "  " ++ flowDisplay ++ " " ++ jack.units
 
     linkStripe =
       Svg.path

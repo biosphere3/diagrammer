@@ -115,6 +115,7 @@ parseJack  process direction order {name, rate, units, per, state} =
     , name = name
     , processID = process.id
     , rate = rate
+    , units = units
     , direction = direction
     , position = process.position `add` offset
     , rect = Shape.jackDimensions

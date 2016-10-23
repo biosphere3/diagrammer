@@ -3,7 +3,7 @@ module Shape exposing (..)
 import String
 import Math.Vector2 exposing (..)
 
-jackDimensions = (130, 60)
+jackDimensions = (150, 60)
 
 
 type Shape = Circle Float

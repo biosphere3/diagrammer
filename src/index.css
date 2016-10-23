@@ -40,7 +40,7 @@ g.link .link-line {
   animation-iteration-count: infinite;
 }
 
-g.link.input .link-line {
+g.link.output .link-line {
   animation-direction: reverse;
 }
 
