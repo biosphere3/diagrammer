@@ -25,6 +25,7 @@ type Msg
     | DragEndTargetContainer Container
 
     | RemoveLink Link
+    | RemoveContainer Container
 
     | MouseWheelTurn Mouse.Position (Int, Int) Float
 
@@ -71,6 +72,7 @@ manageCache msg model =
     DragEndTargetJack _       -> recalc model
     DragEndTargetContainer _  -> recalc model
     RemoveLink _              -> recalc model
+    RemoveContainer _         -> recalc model
 
 
 connectJacks model dragJack jack =
@@ -171,8 +173,11 @@ updateHelp msg ({processByID, jackByID, containerByID, linkByID, drag} as model)
             DragJack dragJack -> model'
 
 
-    RemoveLink link ->
-      removeLink link model
+    RemoveLink link -> removeLink link model
+
+
+    RemoveContainer container -> removeContainer container model
+
 
     MouseWheelTurn position (width, height) delta ->
       let
@@ -260,6 +265,19 @@ removeLink link model =
   { model
   | linkByID = model.linkByID |> Dict.filter (\id _ -> not (id == link.id))
   }
+
+removeContainer : Container -> Model -> Model
+removeContainer container model =
+  let
+    linkByID' =
+      model.linkByID
+      |> Dict.filter (\id link -> link.containerID /= container.id)
+  in
+    { model
+    | linkByID = linkByID'
+    , containerByID = model.containerByID |> Dict.filter (\id _ -> not (id == container.id))
+    }
+
 
 linksEqual : Link -> Link -> Bool
 linksEqual a b =

@@ -201,7 +201,8 @@ drawContainer model calc container =
       , alignmentBaseline "middle"
       ]
   in
-    g [ transform <| fn2 "translate" realPosition.x realPosition.y ]
+    g [ transform <| fn2 "translate" realPosition.x realPosition.y
+      , onDoubleClick (RemoveContainer container) ]
       [ circle attrs []
       , text' textAttrs [text displayText]
       ]
