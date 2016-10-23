@@ -47,24 +47,49 @@ linkPath model process container =
             orthoPlan
                 (processShape, processPosition)
                 (containerShape, containerPosition)
-        (contact1, contact2) = plan.contacts
-        (px, py) = toTuple contact1
-        (cx, cy) = toTuple contact2
     in
         orthoRoute plan
 
 orthoRoute : OrthoPlan -> String
 orthoRoute plan =
     let
+        cornerRadius = 50
         (face1, face2) = plan.faces
         (contact1, contact2) = plan.contacts
         (px, py) = toTuple contact1
         (cx, cy) = toTuple contact2
         points =
             [ (px, py) ] ++ inflectionPoints plan ++ [ (cx, cy) ]
-        items = points |> List.map pair |> List.intersperse "L" |> ((::) "M")
+            |> List.map fromTuple
+
+        triples =
+            List.map3
+                (\a b c -> (a, b, c))
+                (List.drop 0 points)
+                (List.drop 1 points)
+                (List.drop 2 points)
+
+        f (v0, v1, v2) d =
+            let
+                dir1 = direction v1 v0
+                dir2 = direction v1 v2
+                dist1 = distance v1 v0
+                dist2 = distance v1 v2
+                r = cornerRadius `min` (dist1 / 2) `min` (dist2 / 2)
+                t0 = v1 `sub` scale r dir1 |> toTuple
+                t1 = v1 |> toTuple
+                t2 = v1 `sub` scale r dir2 |> toTuple
+            in
+                if r == 0 || isInfinite r
+                then
+                    d ++ " L " ++ pair t1
+                else
+                    d ++ " L " ++ pair t0 ++ " Q " ++ pair t1 ++ " " ++ pair t2
+
+        dMid = List.foldl f "" triples
     in
-        String.join " " items
+        "M " ++ pair (px, py) ++ dMid ++ " L " ++ pair (cx, cy)
+
 
 inflectionPoints plan =
     let

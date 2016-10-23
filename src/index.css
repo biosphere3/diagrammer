@@ -28,7 +28,7 @@ g.link:hover .link-line {
 }
 
 g.link .link-stripe {
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 g.link .link-line {

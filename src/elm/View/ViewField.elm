@@ -211,7 +211,8 @@ drawLink ({containerByID, jackByID} as model) calc link =
       |> map (toString << .flow)
       |> withDefault "???"
 
-    color = getStateColor jack.matterState
+    stripeColor = getStateColor jack.matterState
+    textColor = getStateContrastColor jack.matterState
 
     arrowText = case jack.direction of
       Input -> "  ❯ ❯ ❯  "
@@ -230,8 +231,8 @@ drawLink ({containerByID, jackByID} as model) calc link =
       Svg.path
         [ d dval
         , fill "none"
-        , stroke color
-        , strokeWidth "20"
+        , stroke stripeColor
+        , strokeWidth "25"
         , id domID
         , class "link-stripe"
         ]
@@ -241,7 +242,7 @@ drawLink ({containerByID, jackByID} as model) calc link =
       Svg.path
         [ d dval
         , fill "none"
-        , stroke "white"
+        , stroke textColor
         , strokeWidth "5"
         , strokeDasharray "10,20"
         , id domID
@@ -252,10 +253,10 @@ drawLink ({containerByID, jackByID} as model) calc link =
     linkText =
       text'
         [ alignmentBaseline "bottom"
-        , fill "black"
-        , fontSize "16px"
+        , fill textColor
+        , fontSize "14px"
         , fontFamily "Helvetica Neue, sans-serif"
-        , dy "-15"
+        , dy "5"
         ]
         [ textPath
           [ xlinkHref <| "#" ++ domID
@@ -283,6 +284,13 @@ getStateColor state =
     EnergyState -> "red"
     LightState -> "yellow"
     UnspecifiedState -> "gray"
+
+
+getStateContrastColor : MatterState -> String
+getStateContrastColor state =
+  case state of
+    LightState -> "black"
+    _ -> "white"
 
 
 isConnected : Model -> Jack -> Bool
