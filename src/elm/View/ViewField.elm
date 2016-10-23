@@ -11,6 +11,7 @@ import String
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
+import Constants exposing (colors)
 import Maybe exposing (..)
 import Util exposing (..)
 import Model exposing (..)
@@ -304,12 +305,12 @@ drawLink ({containerByID, jackByID} as model) calc link =
 getStateColor : MatterState -> String
 getStateColor state =
   case state of
-    SolidState -> "green"
-    LiquidState -> "blue"
-    GasState -> "orange"
-    EnergyState -> "red"
-    LightState -> "yellow"
-    UnspecifiedState -> "gray"
+    SolidState -> colors.solid
+    LiquidState -> colors.liquid
+    GasState -> colors.gas
+    EnergyState -> colors.energy
+    LightState -> colors.light
+    UnspecifiedState -> colors.unspecified
 
 
 getStateContrastColor : MatterState -> String
