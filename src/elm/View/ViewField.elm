@@ -262,19 +262,27 @@ drawContainer model calc container =
                 _ ->
                     False
 
+        isFailing =
+            amount
+                -- TODO: refactor
+                -- this is redundant logic wrt isValidSimulationState
+                |>
+                    Maybe.map (\val -> val < 0 || val > container.capacity)
+                |> Maybe.withDefault False
+
         circleColor =
             if isSun then
                 "white"
+            else if isFailing then
+                colors.death
             else
-                case amount of
-                    Just val ->
-                        if val < 0 then
-                            colors.death
-                        else
-                            "white"
+                "white"
 
-                    Nothing ->
-                        "white"
+        rectColor =
+            if isFailing then
+                colors.death
+            else
+                "#ddd"
 
         clipID =
             "container-clip-" ++ (toString container.id)
@@ -309,14 +317,14 @@ drawContainer model calc container =
                 amount |> Maybe.map (\a -> a / container.capacity) |> withDefault 0
 
         fillHeight =
-            radius * 2 * fillRatio
+            Basics.max 0 <| radius * 2 * fillRatio
 
         rectAttrs =
             [ x <| toString (-radius)
             , y <| toString (radius - fillHeight)
             , width "500"
             , height <| toString fillHeight
-            , fill "#ddd"
+            , fill rectColor
             , Svg.Attributes.clipPath <| "url(#" ++ clipID ++ ")"
             ]
 

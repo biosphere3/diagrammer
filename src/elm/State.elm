@@ -290,15 +290,10 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
             TickSimulation t ->
                 if not model.playing then
                     model
+                else if (not << isValidSimulationState) model then
+                    updateHelp (SetPlaying False) model
                 else
-                    let
-                        next =
-                            updateHelp (SetEpoch (model.epoch + 1)) model
-                    in
-                        if isValidSimulationState next then
-                            next
-                        else
-                            updateHelp (SetPlaying False) model
+                    updateHelp (SetEpoch (model.epoch + 1)) model
 
             TickAnimation t ->
                 let
@@ -323,27 +318,25 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
                     { model | linkByID = linkByID' }
 
 
-
---getHuman model =
---  model.processByID
---  |> List.filter \p -> p.name == "Human"
---  |> List.head
---
---isValidSimulationState model calc =
---  case getHuman model of
---    Nothing -> True
---    Just human ->
---      let
---        inputs = getJacksByProcessID human.id |> List.filter (\j -> j.direction == Input)
---        flows =
---          calc.jackByID
---          |> Dict.filter (\id _ -> List.member id (List.map .id inputs))
---          |> Dict.map (\id jack ->)
---          |> List.filter (\{jackID} -> List.member jackID (List.map .id inputs))
-
-
 isValidSimulationState model =
-    model.epoch <= 100
+    let
+        ( calc, _ ) =
+            Calc.getCalc model
+
+        badCapacity id { amount } =
+            case Dict.get id model.containerByID of
+                Nothing ->
+                    False
+
+                Just { capacity } ->
+                    amount > capacity || amount < 0
+
+        problems =
+            calc.containerByID
+                |> Dict.filter badCapacity
+                |> Dict.size
+    in
+        problems == 0
 
 
 isTrulyDragging model =
