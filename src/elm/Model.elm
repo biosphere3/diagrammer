@@ -292,6 +292,10 @@ getGlobalTransform model =
                     model.globalTransform
 
 
+getSun model =
+    model.containerByID |> Dict.values |> List.filter (\c -> c.name == "Sun") |> List.head |> fromJust "no sun"
+
+
 
 -- helpers ------------------------------------------
 --dragOffset : { a | current : Mouse.Position, start : Mouse.Position } -> Vec2

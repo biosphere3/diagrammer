@@ -247,16 +247,22 @@ drawContainer model calc container =
         capacityDisplay =
             (stringOrInf container.capacity)
 
-        circleColor =
-            case amount of
-                Just val ->
-                    if val < 0 then
-                        colors.death
-                    else
-                        "white"
+        isSun =
+            container.id == (.id <| getSun model)
 
-                Nothing ->
-                    "white"
+        circleColor =
+            if isSun then
+                "white"
+            else
+                case amount of
+                    Just val ->
+                        if val < 0 then
+                            colors.death
+                        else
+                            "white"
+
+                    Nothing ->
+                        "white"
 
         clipID =
             "container-clip-" ++ (toString container.id)
@@ -264,15 +270,22 @@ drawContainer model calc container =
         circleID =
             "container-circle-" ++ (toString container.id)
 
-        attrs =
+        circleAttrs =
             [ id circleID
             , cx "0"
             , cy "0"
             , r (toString <| radius)
             , fill circleColor
-            , stroke "black"
-            , strokeWidth "3"
-            , xlinkHref "http://placekitten.com/400"
+            , stroke <|
+                if isSun then
+                    colors.light
+                else
+                    "black"
+            , strokeWidth <|
+                if isSun then
+                    "60"
+                else
+                    "3"
             ]
 
         fillRatio =
@@ -315,7 +328,11 @@ drawContainer model calc container =
     in
         g
             [ transform <| fn2 "translate" realPosition.x realPosition.y
-            , onDoubleClick (RemoveContainer container)
+            , onDoubleClick <|
+                if isSun then
+                    Noop
+                else
+                    (RemoveContainer container)
             , onMouseDown' <| DragContainer container
             , onMouseUp <| DragEndTargetContainer container
             , Html.Attributes.style
@@ -328,7 +345,7 @@ drawContainer model calc container =
                 ]
             ]
             [ Svg.clipPath [ id clipID ] [ use [ xlinkHref <| "#" ++ circleID ] [] ]
-            , circle attrs []
+            , circle circleAttrs []
             , rect rectAttrs []
             , text' nameAttrs [ text container.name ]
             , text' amountAttrs [ text amountDisplay ]

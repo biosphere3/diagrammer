@@ -174,7 +174,7 @@ mkContainer { name, position } =
     { id = generateContainerID name
     , name = name
     , position = position
-    , radius = 100
+    , radius = 80
     , capacity = 1 / 0
     , initialAmount = 1 / 0
     }
