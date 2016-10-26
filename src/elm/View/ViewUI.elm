@@ -3,13 +3,14 @@ module View.ViewUI exposing (..)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on, onClick, onInput)
 import Json.Decode as Json exposing ((:=))
 import Math.Vector2 as V2 exposing (..)
 import Mouse
 import Util exposing (..)
 import Model exposing (..)
 import State exposing (Msg(..))
+import String
 
 
 (:>) =
@@ -19,10 +20,16 @@ import State exposing (Msg(..))
 view : Model -> Html Msg
 view model =
     div
-        [ class "main-ui" ]
-        [ settingsControl model
-        , aboutPanel
-        , timeControl model
+        []
+        [ div
+            [ class "edit-panel" ]
+            [ editForm model ]
+        , div
+            [ class "main-ui" ]
+            [ settingsControl model
+            , aboutPanel
+            , timeControl model
+            ]
         ]
 
 
@@ -50,6 +57,56 @@ aboutPanel =
         , a [ href "http://github.com/biosphere3/diagrammer" ]
             [ text "code" ]
         ]
+
+
+editForm model =
+    let
+        ( form, panelStyle ) =
+            case model.selected of
+                Just (SelectedContainer id) ->
+                    let
+                        { name, capacity } =
+                            seize id model.containerByID
+
+                        setName =
+                            (\x -> EditContainer id x capacity)
+
+                        setCapacity x =
+                            case String.toFloat x of
+                                Ok cap ->
+                                    EditContainer id name cap
+
+                                Err _ ->
+                                    Noop
+
+                        panelStyle =
+                            [ "width" :> "200px" ]
+
+                        form =
+                            [ div
+                                [ class "edit-form" ]
+                                [ h3 [] [ text "Container:" ]
+                                , label
+                                    []
+                                    [ text "Name"
+                                    , input [ type' "text", value name, onInput setName ] []
+                                    ]
+                                , label
+                                    []
+                                    [ text "Capacity"
+                                    , input [ type' "text", value (toString capacity), onInput setCapacity ] []
+                                    ]
+                                ]
+                            ]
+                    in
+                        ( form, panelStyle )
+
+                _ ->
+                    ( [], [] )
+    in
+        div
+            [ class "edit-panel", style panelStyle ]
+            form
 
 
 timeControl : Model -> Html Msg

@@ -7,6 +7,10 @@ html, body {
   font-weight: 400;
 }
 
+h1, h2, h3, h4 {
+  font-weight: 300;
+}
+
 #main, #main > div {
   height: 100%;
 }
@@ -82,4 +86,31 @@ g.link.output .link-line {
 
 .about-panel {
   float: right;
+}
+
+.edit-panel {
+  transition: width 300ms;
+  position: fixed;
+  left: 0;
+  top: 60px;
+  padding-top: 10px;
+  width: 0;
+  height: 100%;
+  background: white;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.edit-panel .edit-form {
+  padding: 10px;
+}
+
+.edit-panel label {
+  display: block;
+  margin: 10px auto;
+}
+
+.edit-panel input {
+  font-size: 16px;
+  max-width: 100%;
 }

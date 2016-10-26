@@ -14,6 +14,13 @@ onKeyDown tagger =
     Html.Events.on "keydown" (Json.map tagger Html.Events.keyCode)
 
 
+onClickStop msg =
+    Html.Events.onWithOptions
+        "click"
+        { stopPropagation = True, preventDefault = True }
+        (Json.succeed msg)
+
+
 toDictByID : List { a | id : Int } -> Dict Int { a | id : Int }
 toDictByID seq =
     let

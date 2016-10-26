@@ -10,3 +10,8 @@ colors =
     , unspecified = "gray"
     , death = "#666"
     }
+
+
+dragThreshold =
+    -- distance between start and end drag position to count as clicks
+    1

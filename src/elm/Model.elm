@@ -19,6 +19,7 @@ type alias Model =
     , jacksVisible : Bool
     , calcCache : CalcCache
     , drag : Maybe Drag
+    , selected : Maybe Selectable
     , globalTransform : Transform
     }
 
@@ -109,6 +110,10 @@ type alias Drag =
     , current : Mouse.Position
     , target : Draggable
     }
+
+
+type Selectable
+    = SelectedContainer ContainerID
 
 
 type Draggable

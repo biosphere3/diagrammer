@@ -5,6 +5,7 @@ import Math.Vector2 exposing (..)
 import Mouse
 import Time exposing (..)
 import Calc
+import Constants
 import Dict exposing (..)
 import Foci exposing (..)
 import Model exposing (..)
@@ -30,6 +31,8 @@ type Msg
     | DragEnd Mouse.Position
     | DragEndTargetJack Jack
     | DragEndTargetContainer Container
+    | SelectItem (Maybe Selectable)
+    | EditContainer ContainerID String Float
     | RemoveLink Link
     | RemoveContainer Container
     | MouseWheelTurn Mouse.Position ( Int, Int ) Float
@@ -177,6 +180,28 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
                     Nothing ->
                         model
 
+            SelectItem selectable ->
+                case drag of
+                    Just _ ->
+                        if isTrulyDragging model then
+                            model
+                        else
+                            { model | selected = selectable }
+
+                    Nothing ->
+                        { model | selected = selectable }
+
+            EditContainer id name capacity ->
+                let
+                    setValues c =
+                        { c | name = name, capacity = capacity }
+                in
+                    { model
+                        | containerByID =
+                            model.containerByID
+                                |> Dict.update id (Maybe.map setValues)
+                    }
+
             DragEndTargetContainer container ->
                 case drag of
                     Just drag ->
@@ -319,6 +344,16 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
 
 isValidSimulationState model =
     model.epoch <= 100
+
+
+isTrulyDragging model =
+    -- see if drag is beyond threshold
+    case model.drag of
+        Nothing ->
+            False
+
+        Just drag ->
+            lengthSquared (dragOffset drag) >= Constants.dragThreshold ^ 2
 
 
 addLink' : ( Container, Jack ) -> Model -> ( Model, Link )

@@ -3,7 +3,7 @@ module View.ViewField exposing (..)
 import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
-import Html.Events exposing (on, onMouseEnter, onMouseLeave, onMouseUp, onDoubleClick)
+import Html.Events exposing (on, onWithOptions, onMouseEnter, onMouseLeave, onMouseUp, onDoubleClick)
 import Json.Decode as Json exposing ((:=), int, float, object4, object2)
 import Math.Vector2 exposing (..)
 import Mouse
@@ -43,6 +43,7 @@ view model =
             [ width "100%"
             , height "100%"
             , onMouseWheel'
+            , onClickStop (SelectItem Nothing)
             , Html.Attributes.style
                 [ "background-position" => ((toString gx) ++ " " ++ (toString gy))
                 ]
@@ -253,6 +254,14 @@ drawContainer model calc container =
         isSun =
             container.id == (.id <| getSun model)
 
+        isSelected =
+            case model.selected of
+                Just (SelectedContainer containerID) ->
+                    containerID == container.id
+
+                _ ->
+                    False
+
         circleColor =
             if isSun then
                 "white"
@@ -287,6 +296,8 @@ drawContainer model calc container =
             , strokeWidth <|
                 if isSun then
                     "60"
+                else if isSelected then
+                    "6"
                 else
                     "3"
             ]
@@ -331,6 +342,7 @@ drawContainer model calc container =
     in
         g
             [ transform <| fn2 "translate" realPosition.x realPosition.y
+            , onClickStop <| SelectItem (Just (SelectedContainer container.id))
             , onDoubleClick <|
                 if isSun then
                     Noop
@@ -519,7 +531,10 @@ isConnected model jack =
 
 onMouseDown' : Draggable -> Attribute Msg
 onMouseDown' target =
-    on "mousedown" (Json.map (DragStart target) Mouse.position)
+    onWithOptions
+        "mousedown"
+        { preventDefault = True, stopPropagation = True }
+        (Json.map (DragStart target) Mouse.position)
 
 
 onMouseWheel' : Attribute Msg
