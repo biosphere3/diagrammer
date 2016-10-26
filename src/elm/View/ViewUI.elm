@@ -64,42 +64,55 @@ editForm model =
         ( form, panelStyle ) =
             case model.selected of
                 Just (SelectedContainer id) ->
-                    let
-                        { name, capacity } =
-                            seize id model.containerByID
+                    case Dict.get id model.containerByID of
+                        Nothing ->
+                            ( [], [] )
 
-                        setName =
-                            (\x -> EditContainer id x capacity)
+                        Just { name, capacity } ->
+                            let
+                                setName =
+                                    (\x -> EditContainer id x capacity)
 
-                        setCapacity x =
-                            case String.toFloat x of
-                                Ok cap ->
-                                    EditContainer id name cap
+                                setCapacity x =
+                                    case String.toFloat x of
+                                        Ok cap ->
+                                            EditContainer id name cap
 
-                                Err _ ->
-                                    Noop
+                                        Err _ ->
+                                            Noop
 
-                        panelStyle =
-                            [ "width" :> "200px" ]
+                                panelStyle =
+                                    [ "width" :> "200px" ]
 
-                        form =
-                            [ div
-                                [ class "edit-form" ]
-                                [ h3 [] [ text "Container:" ]
-                                , label
-                                    []
-                                    [ text "Name"
-                                    , input [ type' "text", value name, onInputStop setName ] []
+                                form =
+                                    [ div
+                                        [ class "edit-form" ]
+                                        [ h3 [] [ text "Edit Container" ]
+                                        , label
+                                            []
+                                            [ text "Name"
+                                            , input [ type' "text", value name, onInputStop setName ] []
+                                            ]
+                                        , label
+                                            []
+                                            [ text "Capacity"
+                                            , input [ type' "text", value (toString capacity), onInputStop setCapacity ] []
+                                            ]
+                                        , div
+                                            [ style
+                                                [ "margin-top" :> "50px"
+                                                , "font-size" :> "0.9em"
+                                                ]
+                                            ]
+                                            [ ul []
+                                                [ li [ class "delete-instruction" ] [ text "Double click container to delete" ]
+                                                , li [ class "delete-instruction" ] [ text "Double click any link to delete" ]
+                                                ]
+                                            ]
+                                        ]
                                     ]
-                                , label
-                                    []
-                                    [ text "Capacity"
-                                    , input [ type' "text", value (toString capacity), onInputStop setCapacity ] []
-                                    ]
-                                ]
-                            ]
-                    in
-                        ( form, panelStyle )
+                            in
+                                ( form, panelStyle )
 
                 _ ->
                     ( [], [] )

@@ -11,6 +11,11 @@ h1, h2, h3, h4 {
   font-weight: 300;
 }
 
+ul {
+  list-style-position: outside;
+  padding-left: 20px;
+}
+
 #main, #main > div {
   height: 100%;
 }
@@ -113,4 +118,8 @@ g.link.output .link-line {
 .edit-panel input {
   font-size: 16px;
   max-width: 100%;
+}
+
+.delete-instruction {
+  margin: 10px auto;
 }
