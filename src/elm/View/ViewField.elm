@@ -44,7 +44,7 @@ view model =
             , height "100%"
             , onMouseWheel'
             , Html.Attributes.style
-                [ "background" => "#ddd"
+                [ "background-position" => ((toString gx) ++ " " ++ (toString gy))
                 ]
             ]
             [ Svg.g

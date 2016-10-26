@@ -11,6 +11,10 @@ html, body {
   height: 100%;
 }
 
+svg {
+  background: white url('dots-bg.png')
+}
+
 svg text {
   pointer-events: none;
   -webkit-user-select: none;

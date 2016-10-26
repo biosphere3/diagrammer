@@ -36,6 +36,10 @@ module.exports = {
         exclude: [/elm-stuff/, /node_modules/],
         loader: 'elm-hot!elm-webpack'
       },
+      {
+        test: /\.(png|jpg)$/,
+        loader: 'url-loader?limit=8192'
+      }
     ],
 
     noParse: /\.elm$/
