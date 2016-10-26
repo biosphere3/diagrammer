@@ -10,7 +10,11 @@ const flags = {
   library: libraryConfig
 };
 
-Elm.Main.embed(
+const app = Elm.Main.embed(
   document.getElementById('main'),
   flags
 );
+
+document.addEventListener("keydown", e => {
+  app.ports.keyDown.send(e.keyCode);
+});

@@ -33,10 +33,11 @@ settingsControl model =
         [ text "Show inputs/outputs"
         , input
             [ type' "checkbox"
-            , checked True
+            , checked model.jacksVisible
             , onClick (SetJacksVisible <| not model.jacksVisible)
             ]
             []
+        , div [ style [ "fontSize" :> "0.8em", "color" :> "gray" ] ] [ text "(shortcut 'h')" ]
         ]
 
 

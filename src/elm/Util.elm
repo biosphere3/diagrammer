@@ -4,6 +4,14 @@ import Math.Vector2 exposing (..)
 import Mouse exposing (Position)
 import Debug
 import Dict exposing (Dict)
+import Json.Decode as Json
+import Html
+import Html.Events
+
+
+onKeyDown : (Int -> msg) -> Html.Attribute msg
+onKeyDown tagger =
+    Html.Events.on "keydown" (Json.map tagger Html.Events.keyCode)
 
 
 toDictByID : List { a | id : Int } -> Dict Int { a | id : Int }

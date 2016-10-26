@@ -1,4 +1,4 @@
-module State exposing (..)
+port module State exposing (..)
 
 import Focus exposing (..)
 import Math.Vector2 exposing (..)
@@ -38,6 +38,7 @@ type Msg
     | SetJacksVisible Bool
     | TickAnimation Time
     | TickSimulation Time
+    | KeyPress Int
     | Noop
 
 
@@ -254,6 +255,13 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
                     | epoch = epoch
                 }
 
+            KeyPress keyCode ->
+                if keyCode == 72 then
+                    -- "h"
+                    { model | jacksVisible = not model.jacksVisible }
+                else
+                    model
+
             TickSimulation t ->
                 if not model.playing then
                     model
@@ -363,6 +371,13 @@ linksEqual a b =
 
 
 
+-- PORTS
+
+
+port keyDown : (Int -> msg) -> Sub msg
+
+
+
 -- SUBSCRIPTIONS
 
 
@@ -390,6 +405,7 @@ subscriptions model =
         Sub.batch
             [ dragging
             , simTick
+            , keyDown KeyPress
             ]
 
 
