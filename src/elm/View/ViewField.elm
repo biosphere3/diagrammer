@@ -342,7 +342,11 @@ drawContainer model calc container =
     in
         g
             [ transform <| fn2 "translate" realPosition.x realPosition.y
-            , onClickStop <| SelectItem (Just (SelectedContainer container.id))
+            , onClickStop <|
+                if isSun then
+                    Noop
+                else
+                    SelectItem (Just (SelectedContainer container.id))
             , onDoubleClick <|
                 if isSun then
                     Noop
