@@ -89,12 +89,12 @@ editForm model =
                                 , label
                                     []
                                     [ text "Name"
-                                    , input [ type' "text", value name, onInput setName ] []
+                                    , input [ type' "text", value name, onInputStop setName ] []
                                     ]
                                 , label
                                     []
                                     [ text "Capacity"
-                                    , input [ type' "text", value (toString capacity), onInput setCapacity ] []
+                                    , input [ type' "text", value (toString capacity), onInputStop setCapacity ] []
                                     ]
                                 ]
                             ]

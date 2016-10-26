@@ -9,6 +9,10 @@ import Html
 import Html.Events
 
 
+eventStopOptions =
+    { stopPropagation = True, preventDefault = True }
+
+
 onKeyDown : (Int -> msg) -> Html.Attribute msg
 onKeyDown tagger =
     Html.Events.on "keydown" (Json.map tagger Html.Events.keyCode)
@@ -17,8 +21,16 @@ onKeyDown tagger =
 onClickStop msg =
     Html.Events.onWithOptions
         "click"
-        { stopPropagation = True, preventDefault = True }
+        eventStopOptions
         (Json.succeed msg)
+
+
+onInputStop : (String -> msg) -> Html.Attribute msg
+onInputStop tagger =
+    Html.Events.onWithOptions
+        "input"
+        eventStopOptions
+        (Json.map tagger Html.Events.targetValue)
 
 
 toDictByID : List { a | id : Int } -> Dict Int { a | id : Int }
