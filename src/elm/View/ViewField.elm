@@ -124,7 +124,7 @@ drawProcess model calc process =
             g [] [ textBox, textContent ]
 
         drawnJacks =
-            if model.playing then
+            if not model.jacksVisible then
                 []
             else
                 (looseJacks |> List.map (drawJack model calc))

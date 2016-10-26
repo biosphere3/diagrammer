@@ -35,8 +35,10 @@ type Msg
     | MouseWheelTurn Mouse.Position ( Int, Int ) Float
     | SetEpoch Int
     | SetPlaying Bool
+    | SetJacksVisible Bool
     | TickAnimation Time
     | TickSimulation Time
+    | Noop
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -102,6 +104,9 @@ manageCache msg model =
             RemoveContainer _ ->
                 recalc model
 
+            _ ->
+                recalc model
+
 
 connectJacks model dragJack jack =
     let
@@ -149,6 +154,9 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
             getGetters model
     in
         case msg of
+            Noop ->
+                model
+
             DragStart target xy ->
                 { model | drag = (Just (Drag xy xy target)) }
 
@@ -237,6 +245,9 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
 
             SetPlaying playing ->
                 { model | playing = playing }
+
+            SetJacksVisible visible ->
+                { model | jacksVisible = visible }
 
             SetEpoch epoch ->
                 { model

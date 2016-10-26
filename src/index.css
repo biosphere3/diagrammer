@@ -53,10 +53,33 @@ g.link.output .link-line {
     100% { stroke-dashoffset: 30px; }
 }
 
+.main-ui {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 15px 20px;
+  background: white;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
 
 .time-control button {
   font-size: 24px;
   background: none;
   border: none;
   margin: auto 3px;
+}
+
+.settings-control {
+  float: left;
+  font-size: 16px;
+}
+
+.settings-control input {
+  font-size: 24px;
+}
+
+.about-panel {
+  float: right;
 }

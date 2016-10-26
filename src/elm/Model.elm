@@ -16,6 +16,7 @@ type alias Model =
     , linkByID : LinkDict
     , epoch : Int
     , playing : Bool
+    , jacksVisible : Bool
     , calcCache : CalcCache
     , drag : Maybe Drag
     , globalTransform : Transform

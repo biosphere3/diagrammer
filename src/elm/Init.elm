@@ -67,6 +67,7 @@ init flags =
           , linkByID = linkByID
           , epoch = 0
           , playing = False
+          , jacksVisible = True
           , drag = Nothing
           , globalTransform = { translate = vec2 0 300, scale = 1.0 }
           , calcCache = Dict.empty

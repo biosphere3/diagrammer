@@ -18,26 +18,37 @@ import State exposing (Msg(..))
 
 view : Model -> Html Msg
 view model =
-    let
-        styles =
-            style
-                [ "width" :> "100%"
-                , "height" :> "40px"
-                , "position" :> "fixed"
-                , "top" :> "0"
-                , "left" :> "0"
-                , "padding" :> "15px"
-                , "background" :> "white"
-                , "box-shadow" :> "0 1px 10px rgba(0, 0, 0, 0.5)"
-                  --, "border-bottom" :> "1px solid gray"
-                ]
-    in
-        div
-            [ styles
-            , class "time-control"
+    div
+        [ class "main-ui" ]
+        [ settingsControl model
+        , aboutPanel
+        , timeControl model
+        ]
+
+
+settingsControl : Model -> Html Msg
+settingsControl model =
+    div
+        [ class "settings-control" ]
+        [ text "Show inputs/outputs"
+        , input
+            [ type' "checkbox"
+            , checked True
+            , onClick (SetJacksVisible <| not model.jacksVisible)
             ]
-            [ timeControl model
-            ]
+            []
+        ]
+
+
+aboutPanel =
+    div
+        [ class "about-panel" ]
+        [ a [ href "http://biosphere3.org" ]
+            [ text "about" ]
+        , text " :: "
+        , a [ href "http://github.com/biosphere3/diagrammer" ]
+            [ text "code" ]
+        ]
 
 
 timeControl : Model -> Html Msg
@@ -74,7 +85,8 @@ timeControl ({ epoch, playing } as model) =
             [ onClick (go <| epoch + 1) ]
     in
         div
-            [ style
+            [ class "time-control"
+            , style
                 [ "text-align" :> "center" ]
             ]
             [ div []
