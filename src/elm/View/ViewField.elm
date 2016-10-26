@@ -160,6 +160,9 @@ drawJack model calc jack =
         color =
             getStateColor jack.matterState
 
+        textColor =
+            getStateContrastColor jack.matterState
+
         outline =
             Svg.path
                 ([ onMouseDown' <| DragJack jack
@@ -187,7 +190,7 @@ drawJack model calc jack =
                 , y <| toString (-h / 5)
                 , alignmentBaseline "middle"
                 , textAnchor "middle"
-                , fill "white"
+                , fill textColor
                 , fontSize "20px"
                 ]
                 [ text <| jack.name ]
@@ -198,7 +201,7 @@ drawJack model calc jack =
                 , y <| toString (h / 5)
                 , alignmentBaseline "middle"
                 , textAnchor "middle"
-                , fill "white"
+                , fill textColor
                 ]
                 [ text <| toString jack.rate ++ " " ++ jack.units ]
     in
