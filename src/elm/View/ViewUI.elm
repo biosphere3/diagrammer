@@ -82,7 +82,7 @@ editForm model =
                                             Noop
 
                                 panelStyle =
-                                    [ "width" :> "200px" ]
+                                    [ "left" :> "0" ]
 
                                 form =
                                     [ div

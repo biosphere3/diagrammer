@@ -94,12 +94,12 @@ g.link.output .link-line {
 }
 
 .edit-panel {
-  transition: width 300ms;
+  transition: left 200ms;
   position: fixed;
-  left: 0;
+  left: -200px;
   top: 60px;
   padding-top: 10px;
-  width: 0;
+  width: 200px;
   height: 100%;
   background: white;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
