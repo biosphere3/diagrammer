@@ -1,5 +1,5 @@
 processes:
-  - name: Solar Cities IBC Biodigester
+  - name: IBC Biodigester
     excerpt: >
       A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
     image: https://i.ytimg.com/vi/fSN6yZHpsvk/hqdefault.jpg
@@ -113,42 +113,48 @@ processes:
         rate: 20
         units: L
         per: day
-  - name: G-Tower Array
+  - name: Farmbot XL
     excerpt: >
         The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
-    image: null
+    image: https://farmbot.io/wp-content/uploads/2014/03/Genesis-V0.9-e1443598535701.png
     inputs:
       - name: Nutrient Rich Water
         state: liquid
         temp: 80F
-        rate: 30
+        rate: 15
         units: Gal
-        per: Hour
+        per: day
       - name: Sunlight
         state: light
         temp: null
         rate: 4
-        units: kwh/m3
+        units: kWh/m2
         per: day
     outputs:
       - name: Gray Water
         state: liquid
         temp: 80F
-        rate: 30
+        rate: 15
         units: Gal
-        per: Hour
+        per: day
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 3000
-        units: kCal
+        rate: 328
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 1
+        units: kg
         per: day
   - name: Human
     excerpt: >
       A human is a naked ape. They can be powered by sunlight, but most of them don't know that yet.
     image: http://leonardodavinci.stanford.edu/submissions/clabaugh/images/vm/leonardo.jpg
     inputs:
-      - name: Potable Water
+      - name: Water
         state: liquid
         temp: 60F
         rate: 1
@@ -158,20 +164,20 @@ processes:
         state: energy
         temp: null
         rate: 2500
-        units: kCal
+        units: Calories
         per: day
     outputs:
       - name: Urine
         state: liquid
         temp: 98F
-        rate: 3
-        units: L
+        rate: 1
+        units: gal
         per: day
       - name: Feces
         state: solid
         temp: 98F
-        rate: 400
-        units: g
+        rate: .25
+        units: kg
         per: day
   - name: Carbon Battery
     excerpt: >
