@@ -16,5 +16,7 @@ const app = Elm.Main.embed(
 );
 
 document.addEventListener("keydown", e => {
-  app.ports.keyDown.send(e.keyCode);
+  if (e.altKey) {
+    app.ports.keyDown.send(e.keyCode);
+  }
 });

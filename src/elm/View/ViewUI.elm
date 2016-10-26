@@ -44,7 +44,7 @@ settingsControl model =
             , onClick (SetJacksVisible <| not model.jacksVisible)
             ]
             []
-        , div [ style [ "fontSize" :> "0.8em", "color" :> "gray" ] ] [ text "(shortcut 'h')" ]
+        , div [ style [ "fontSize" :> "0.9em", "color" :> "gray" ] ] [ text "(shortcut: Alt+h)" ]
         ]
 
 
