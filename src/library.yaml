@@ -2,7 +2,37 @@ processes:
   - name: IBC Biodigester
     excerpt: >
       A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
-    image: https://i.ytimg.com/vi/fSN6yZHpsvk/hqdefault.jpg
+    image: http://solarcities.eu/sites/default/files/styles/content_medium/public/media/3ibc.png?itok=atrHBT-O
+    inputs:
+      - name: Water
+        state: liquid
+        temp: 115F
+        rate: 5
+        units: gal
+        per: day
+      - name: Organic Waste
+        state: solid
+        temp: 60F
+        rate: 1
+        units: kg
+        per: day
+    outputs:
+      - name: Biogas
+        state: gas
+        temp: 95F
+        rate: 1
+        units: cubic meter
+        per: day
+      - name: Effluent
+        state: liquid
+        temp: 95F
+        rate: 5
+        units: gal
+        per: day
+  - name: IBC Biodigester 2
+    excerpt: >
+      A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
+    image: http://solarcities.eu/sites/default/files/styles/content_medium/public/media/3ibc.png?itok=atrHBT-O
     inputs:
       - name: Water
         state: liquid
@@ -47,30 +77,24 @@ processes:
         rate: 1
         units: kwh
         per: hour
-  - name: InStove Cook Stove
+  - name: Cook Stove
     excerpt: >
       The instove is a cookstove/rocket stove that can be easily build and use any type of heat energy for cooking and water heating.
-    image: http://cdn3.bigcommerce.com/s-mthxd47d/products/78/images/271/InStove100L__32610.1450406295.1280.1280.jpg
+    image: http://target.scene7.com/is/image/Target/14525615?wid=450&hei=450&fmt=pjpeg
     inputs:
-      - name: Heat
-        state: energy
-        temp: null
-        rate: 35000
-        units: BTU
-        per: hour
-    outputs:
-      - name: Electricity
-        state: energy
+      - name: Biogas
+        state: gas
         temp: null
         rate: 1
-        units: kwh
-        per: hour
-      - name: Heat
-        state: energy
+        units: cubic meter
+        per: day
+    outputs:
+      - name: Cooked food
+        state: solid
         temp: null
-        rate: 31150
-        units: BTU
-        per: hour
+        rate: 2000
+        units: Calories
+        per: day
   - name: Hot water heater
     excerpt: >
         A gas hot water heater can be modified to take heat from any gas stream. This is a standard home water heater, converted to run on exhuast gas from the incinerator
@@ -95,33 +119,15 @@ processes:
         rate: 15000
         units: BTU
         per: hour
-  - name: ShowerLoop
-    excerpt: >
-        The showerloop is an open source water recycling shower that saves water and energy by recycling hot water for the duration of the shower.
-    image: http://s1.dmcdn.net/OV9mG.jpg
-    inputs:
-      - name: Hot Water
-        state: liquid
-        temp: 108F
-        rate: 20
-        units: L
-        per: day
-    outputs:
-      - name: Gray Water
-        state: liquid
-        temp: 80F
-        rate: 20
-        units: L
-        per: day
   - name: Farmbot XL
     excerpt: >
-        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+        The showerloop is an open source water recycling shower that saves water and energy by recycling hot water for the duration of the shower.
     image: https://farmbot.io/wp-content/uploads/2014/03/Genesis-V0.9-e1443598535701.png
     inputs:
       - name: Nutrient Rich Water
         state: liquid
         temp: 80F
-        rate: 15
+        rate: 2.5
         units: Gal
         per: day
       - name: Sunlight
@@ -134,13 +140,121 @@ processes:
       - name: Gray Water
         state: liquid
         temp: 80F
-        rate: 15
+        rate: 2.5
         units: Gal
         per: day
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 328
+        rate: 500
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 1
+        units: kg
+        per: day
+  - name: Farmbot XL 2
+    excerpt: >
+        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+    image: https://farmbot.io/wp-content/uploads/2014/03/Genesis-V0.9-e1443598535701.png
+    inputs:
+      - name: Nutrient Rich Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 4
+        units: kWh/m2
+        per: day
+    outputs:
+      - name: Gray Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Vegetables
+        state: solid
+        temp: 65F
+        rate: 500
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 1
+        units: kg
+        per: day
+  - name: Farmbot XL 3
+    excerpt: >
+        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+    image: https://farmbot.io/wp-content/uploads/2014/03/Genesis-V0.9-e1443598535701.png
+    inputs:
+      - name: Nutrient Rich Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 4
+        units: kWh/m2
+        per: day
+    outputs:
+      - name: Gray Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Vegetables
+        state: solid
+        temp: 65F
+        rate: 500
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 1
+        units: kg
+        per: day
+  - name: Farmbot XL 4
+    excerpt: >
+        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+    image: https://farmbot.io/wp-content/uploads/2014/03/Genesis-V0.9-e1443598535701.png
+    inputs:
+      - name: Nutrient Rich Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 4
+        units: kWh/m2
+        per: day
+    outputs:
+      - name: Gray Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Vegetables
+        state: solid
+        temp: 65F
+        rate: 500
         units: Calories
         per: day
       - name: Inedible Biomass
@@ -152,7 +266,7 @@ processes:
   - name: Human
     excerpt: >
       A human is a naked ape. They can be powered by sunlight, but most of them don't know that yet.
-    image: http://leonardodavinci.stanford.edu/submissions/clabaugh/images/vm/leonardo.jpg
+    image: https://a2ua.com/human/human-002.jpg
     inputs:
       - name: Water
         state: liquid
@@ -163,7 +277,7 @@ processes:
       - name: Calories
         state: energy
         temp: null
-        rate: 2500
+        rate: 2000
         units: Calories
         per: day
     outputs:
@@ -179,43 +293,7 @@ processes:
         rate: .25
         units: kg
         per: day
-  - name: Carbon Battery
-    excerpt: >
-        A carbon battery turns unprocessed biomass into heat, hot water, and electricity.
-    image: null
-    inputs:
-      - name: Biomass
-        state: solid
-        temp: 60F
-        rate: 30
-        units: kg
-        per: day
-      - name: Water
-        state: liquid
-        temp: 60F
-        rate: 1
-        units: g
-        per: day
-    outputs:
-      - name: Heat
-        state: energy
-        temp: null
-        rate: 500000
-        units: BTU
-        per: day
-      - name: Water
-        state: liquid
-        temp: 155F
-        rate: 15
-        units: Gal
-        per: hour
-      - name: Electricity
-        state: energy
-        temp: null
-        rate: 400
-        units: wh
-        per: hour
-  - name: Life Straw Filter
+  - name: Ceramic Filter
     excerpt: >
         The lifestraw filter is a low-cost, gravity fed ceramic filter. It takes clean water and turns it into potable water by passing the water through a micro-porous ceramic filter medium.
     image: http://eartheasy.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/l/s/ls-bag1652-fb-new-edited.jpg
@@ -223,15 +301,15 @@ processes:
       - name: Clean Water
         state: liquid
         temp: 60F
-        rate: 90
-        units: L
+        rate: 1
+        units: Gal
         per: day
     outputs:
       - name: Potable Water
         state: liquid
         temp: 60F
-        rate: 90
-        units: L
+        rate: 1
+        units: gal
         per: day
   - name: Slow Sand Filter
     excerpt: >
@@ -241,14 +319,14 @@ processes:
       - name: Gray Water
         state: liquid
         temp: 60F
-        rate: 100
+        rate: 1
         units: gal
         per: day
     outputs:
       - name: Clean Water
         state: liquid
         temp: 60F
-        rate: 100
+        rate: 1
         units: gal
         per: day
   - name: 235 Watt Solar Panel
