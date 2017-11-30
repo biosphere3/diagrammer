@@ -6,9 +6,9 @@ This is an unfinished prototype.
 
 ## Usage
 
-Drag and drop components to place them in space
-The solid-colored chevron shapes attached to components are inputs and outputs -- inputs are on the left, outputs are on the right. Inputs can be attached to outputs and vice-versa.
-Once a system is set up, click the Run button to simulate the process. If any value goes below zero, the simulation will pause.
+* Drag and drop components to place them in space
+* The solid-colored chevron shapes attached to components are inputs and outputs -- inputs are on the left, outputs are on the right. Inputs can be attached to outputs and vice-versa.
+* Once a system is set up, click the Run button to simulate the process. If any value goes below zero, the simulation will pause.
 
 
 ## Running in dev mode
