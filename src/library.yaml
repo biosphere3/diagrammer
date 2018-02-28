@@ -77,7 +77,7 @@ processes:
         rate: 1
         units: kwh
         per: hour
-  - name: Cook Stove
+  - name: Biogas Stove
     excerpt: >
       The instove is a cookstove/rocket stove that can be easily build and use any type of heat energy for cooking and water heating.
     image: http://target.scene7.com/is/image/Target/14525615?wid=450&hei=450&fmt=pjpeg
@@ -85,8 +85,14 @@ processes:
       - name: Biogas
         state: gas
         temp: null
-        rate: 1
+        rate: 2
         units: cubic meter
+        per: day
+      - name: Uncooked Food
+        state: Solid
+        temp: null
+        rate: 2000
+        units: calories
         per: day
     outputs:
       - name: Cooked food
@@ -266,7 +272,7 @@ processes:
   - name: Human
     excerpt: >
       A human is a naked ape. They can be powered by sunlight, but most of them don't know that yet.
-    image: https://a2ua.com/human/human-002.jpg
+    image: https://www.formfonts.com/files/1/11752/man-person-people-boy-student-human_FF_Model_ID11752_1_2dpstand11_thumb.jpg
     inputs:
       - name: Water
         state: liquid
@@ -290,13 +296,13 @@ processes:
       - name: Feces
         state: solid
         temp: 98F
-        rate: .25
-        units: kg
+        rate: 300
+        units: g
         per: day
   - name: Ceramic Filter
     excerpt: >
         The lifestraw filter is a low-cost, gravity fed ceramic filter. It takes clean water and turns it into potable water by passing the water through a micro-porous ceramic filter medium.
-    image: http://eartheasy.com/media/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/l/s/ls-bag1652-fb-new-edited.jpg
+    image: http://www.water-filters-reviewed.com/image-files/doulton-ceramic-water-filter.jpg
     inputs:
       - name: Clean Water
         state: liquid
@@ -314,7 +320,7 @@ processes:
   - name: Slow Sand Filter
     excerpt: >
         A slow sand filter filters water through layers of sand, gravel, and charcoal. It is a slow process, but is an effective first step in cleaning and clarifying dirty water or gray water.
-    image: http://image.slidesharecdn.com/uwp-finaledit-110802160638-phpapp01/95/urban-water-partners-gbcc-2011-8-728.jpg
+    image: http://www.americanaquariumproducts.com/images/graphics/pondbarrelfilter1.jpg
     inputs:
       - name: Gray Water
         state: liquid
@@ -332,7 +338,7 @@ processes:
   - name: 235 Watt Solar Panel
     excerpt: >
       A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
-    image: http://www.thesolarbiz.com/Suniva.jpg
+    image: http://www.ecodirect.com/v/vspfiles/photos/Canadian-Solar-CS6P-225PX-2.jpg
     inputs:
       - name: Sunlight
         state: light
@@ -347,3 +353,172 @@ processes:
         rate: 1.4
         units: kwh
         per: day
+  - name: Rain
+    excerpt: >
+      It rains a little bit most places.
+    image: http://www.clker.com/cliparts/t/E/7/E/B/w/rain-drop-hi.png
+    inputs:
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 10000000
+        units: kwh
+        per: day
+    outputs:
+      - name: Rainwater
+        state: liquid
+        temp: null
+        rate: 1
+        units: gal
+        per: day
+  - name: 5000sqft Corn
+    excerpt: >
+        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+    image: http://www.allthingsclipart.com/07/corn.plants.10.jpg
+    inputs:
+      - name: Nutrient Rich Water
+        state: liquid
+        temp: 80F
+        rate: 4
+        units: Gal
+        per: Day
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 5
+        units: kWh/m2
+        per: day
+    outputs:
+      - name: Corn
+        state: solid
+        temp: 65F
+        rate: 1700
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 10
+        units: kg
+        per: day
+  - name: 5000sqft Wheat
+    excerpt: >
+        The g-tower is an open-source PVC pipe-based grow tower. It can produce the equivalent of 40 square feet of growing space in one square foot.
+    image: https://thumbs.dreamstime.com/b/wheat-ears-isolated-21847391.jpg
+    inputs:
+      - name: Nutrient Rich Water
+        state: liquid
+        temp: 80F
+        rate: 2.5
+        units: Gal
+        per: day
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 4
+        units: kWh/m2
+        per: day
+    outputs:
+      - name: Wheat
+        state: solid
+        temp: 65F
+        rate: 800
+        units: Calories
+        per: day
+      - name: Inedible Biomass
+        state: solid
+        temp: 65F
+        rate: 8
+        units: kg
+        per: day
+  - name: Sinewave Inverter
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: http://www.shop.ilportaledelsole.com/WebRoot/ce_it/Shops/990116484/5112/7597/582D/81F3/6D97/C0A8/8008/38F4/KP1000.jpg
+    inputs:
+      - name: 30V DC Electricity
+        state: energy
+        temp: null
+        rate: 5
+        units: kWh
+        per: day
+    outputs:
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: 4.5
+        units: kwh
+        per: day
+  - name: Plastic Shredder
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: https://user-assets.sharetribe.com/images/listing_images/images/1272812/small_3x2/shredder-bazar.jpg
+    inputs:
+      - name: Shaft Power
+        state: energy
+        temp: null
+        rate: 100
+        units: Rotations
+        per: Min
+      - name: Sorted Plastic 
+        state: solid
+        temp: null
+        rate: 50
+        units: kg
+        per: day
+    outputs:
+      - name: Shredded Plastic Flakes
+        state: solid
+        temp: null
+        rate: 50
+        units: kg
+        per: day
+  - name: Worm Gear
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: https://images-na.ssl-images-amazon.com/images/I/71cAsjTIWxL._SL1250_.jpg
+    inputs:
+      - name: Shaft Power
+        state: energy
+        temp: null
+        rate: 3700
+        units: Rotations
+        per: Min
+    outputs:
+      - name: Shaft Power
+        state: energy
+        temp: null
+        rate: 100
+        units: Rotations
+        per: Min
+  - name: Small Engine
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: http://gmcs.nbed.nb.ca/mste_bbt_site08/Gas_Engine.jpg
+    inputs:
+      - name: Hydrocarbon Fuel
+        state: liquid
+        temp: null
+        rate: 2
+        units: Gal
+        per: Day
+      - name: Air
+        state: gas
+        temp: null
+        rate: 100
+        units: Cu/Ft
+        per: Day
+    outputs:
+      - name: Shaft Power
+        state: energy
+        temp: null
+        rate: 3700
+        units: Rotations
+        per: Min
+      - name: Hot Exhuast
+        state: gas
+        temp: 300
+        rate: 200
+        units: Cu/Ft
+        per: Day
+        
