@@ -101,12 +101,12 @@ parseProcess n { name, excerpt, image } =
     let
         x =
             if n % 2 == 0 then
-                -600
+                -500
             else
-                -200
+                -100
 
         y =
-            (-600 + (toFloat n) * 150)
+            (-600 + (toFloat n) * 200)
     in
         { id = generateProcessID name
         , name = name
@@ -168,15 +168,16 @@ parseJack process direction order { name, rate, units, per, state } =
 
 
 containers =
-    [ { id = generateContainerID "Sun", name = "Sun", position = vec2 600 100 }
+    [ { id = generateContainerID "Sun", name = "Sun", position = vec2 600 100, unitDisplay = Just "kWh/day" }
     ]
 
 
-mkContainer : { a | name : String, position : Vec2 } -> Container
-mkContainer { name, position } =
+mkContainer : { a | name : String, position : Vec2, unitDisplay : Maybe String } -> Container
+mkContainer { name, position, unitDisplay } =
     { id = generateContainerID name
     , name = name
     , position = position
+    , unitDisplay = unitDisplay
     , radius = 80
     , capacity = 1 / 0
     , initialAmount = 1 / 0

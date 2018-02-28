@@ -248,6 +248,11 @@ drawContainer model calc container =
                 |> Maybe.map stringOrInf
                 |> Maybe.withDefault "???"
 
+        unitDisplay_ =
+          container.unitDisplay
+              |> Maybe.map (\d -> " " ++ d)
+              |> Maybe.withDefault ""
+
         capacityDisplay =
             (stringOrInf container.capacity)
 
@@ -337,16 +342,19 @@ drawContainer model calc container =
             ]
 
         nameAttrs =
-            textAttrs ++ [ y "-10", fontSize "20px" ]
+            textAttrs ++ [ y "-15", fontSize "20px" ]
 
         amountAttrs =
-            textAttrs ++ [ y "15", fontSize "24px" ]
+            textAttrs ++ [ y "7", fontSize "24px" ]
+
+        unitAttrs =
+            textAttrs ++ [ y "26", fontSize "14px" ]
 
         capacityAttrs =
-            textAttrs ++ [ y "38", fontSize "16px", fill "#666" ]
+            textAttrs ++ [ y "46", fontSize "16px", fill "#666" ]
 
         dividerAttrs =
-            [ x1 "-20", x2 "20", y1 "27", y2 "27", stroke "#666" ]
+            [ x1 "-20", x2 "20", y1 "34", y2 "34", stroke "#666" ]
     in
         g
             [ transform <| fn2 "translate" realPosition.x realPosition.y
@@ -375,7 +383,8 @@ drawContainer model calc container =
             , circle circleAttrs []
             , rect rectAttrs []
             , text_ nameAttrs [ text container.name ]
-            , text_ amountAttrs [ text amountDisplay ]
+            , text_ amountAttrs [ text <| amountDisplay ]
+            , text_ unitAttrs [ text <| unitDisplay_ ]
             , line dividerAttrs []
             , text_ capacityAttrs [ text capacityDisplay ]
             ]

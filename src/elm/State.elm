@@ -133,6 +133,7 @@ connectJacks model dragJack jack =
                 , radius = 62
                 , capacity = hardcodedContainerCapacity
                 , initialAmount = 0
+                , unitDisplay = Just <| dragJack.units ++ "/" ++ dragJack.per
                 }
 
         newModel =
@@ -354,8 +355,8 @@ isTrulyDragging model =
             lengthSquared (dragOffset drag) >= Constants.dragThreshold ^ 2
 
 
-addLink0 : ( Container, Jack ) -> Model -> ( Model, Link )
-addLink0 ( container, jack ) model =
+addLink_ : ( Container, Jack ) -> Model -> ( Model, Link )
+addLink_ ( container, jack ) model =
     let
         link =
             { id = container.id + jack.id
@@ -375,7 +376,7 @@ addLink0 ( container, jack ) model =
 
 addLink : ( Container, Jack ) -> Model -> Model
 addLink pair model =
-    first <| addLink0 pair model
+    first <| addLink_ pair model
 
 
 removeLink : Link -> Model -> Model

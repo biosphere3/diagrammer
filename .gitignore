@@ -3,6 +3,7 @@ dist/
 
 *.sublime-project
 *.sublime-workspace
+*.tags*
 
 target/compiled
 node_modules

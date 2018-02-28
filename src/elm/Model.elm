@@ -75,6 +75,7 @@ type alias Container =
     { id : ID
     , name : String
     , capacity : Float
+    , unitDisplay : Maybe String  -- TODO: temporarily show units for clarity
     , initialAmount : Float
     , position : Vec2
     , radius : Float
