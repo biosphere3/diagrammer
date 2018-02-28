@@ -123,16 +123,16 @@ orthoRoute plan =
                     distance v1 v2
 
                 r =
-                    cornerRadius `min` (dist1 / 2) `min` (dist2 / 2)
+                    cornerRadius |> min (dist1 / 2) |> min (dist2 / 2)
 
                 t0 =
-                    v1 `sub` scale r dir1 |> toTuple
+                    sub v1 (scale r dir1) |> toTuple
 
                 t1 =
                     v1 |> toTuple
 
                 t2 =
-                    v1 `sub` scale r dir2 |> toTuple
+                    sub v1 (scale r dir2) |> toTuple
             in
                 if r == 0 || isInfinite r then
                     d ++ " L " ++ pair t1
@@ -255,7 +255,7 @@ faceOffset shape face =
     in
         case shape of
             Circle radius ->
-                radius `scale` unit
+                scale radius unit
 
             Rect width height ->
                 vec2 (getX unit * width / 2) (getY unit * height / 2)
@@ -263,7 +263,7 @@ faceOffset shape face =
 
 contactPoint : ( Shape, Vec2 ) -> Face -> Vec2
 contactPoint ( shape, position ) face =
-    position `add` (faceOffset shape face)
+    add position (faceOffset shape face)
 
 
 pair ( x, y ) =

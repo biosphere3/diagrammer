@@ -189,7 +189,7 @@ getProcessPosition { drag } { id, position } =
             case drag.target of
                 DragProcess dragProcess ->
                     if dragProcess.id == id then
-                        position `add` dragOffset drag
+                        add position <| dragOffset drag
                     else
                         position
 
@@ -222,7 +222,7 @@ getContainerPosition { drag } { id, position } =
             case drag.target of
                 DragContainer dragContainer ->
                     if dragContainer.id == id then
-                        position `add` dragOffset drag
+                        add position <| dragOffset drag
                     else
                         position
 
@@ -257,13 +257,13 @@ getJackPosition { drag, processByID } { id, position, processID } =
                     case target of
                         DragProcess dragProcess ->
                             if dragProcess.id == process.id then
-                                position `add` offset
+                                add position <| offset
                             else
                                 position
 
                         DragJack dragJack ->
                             if dragJack.id == id then
-                                position `add` offset
+                                add position <| offset
                             else
                                 position
 

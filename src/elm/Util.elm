@@ -100,8 +100,8 @@ repeat n v =
 zip : List a -> List b -> List ( a, b )
 zip xs ys =
     case ( xs, ys ) of
-        ( x :: xs', y :: ys' ) ->
-            ( x, y ) :: zip xs' ys'
+        ( x :: xs0, y :: ys0 ) ->
+            ( x, y ) :: zip xs0 ys0
 
         ( _, _ ) ->
             []

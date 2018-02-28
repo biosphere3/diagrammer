@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on, onWithOptions, onMouseEnter, onMouseLeave, onMouseUp, onDoubleClick)
-import Json.Decode as Json exposing ((:=), int, float, object4, object2)
+import Json.Decode as Json exposing (field, int, float)
 import Math.Vector2 exposing (..)
 import Mouse
 import String
@@ -42,7 +42,7 @@ view model =
         Svg.svg
             [ width "100%"
             , height "100%"
-            , onMouseWheel'
+            , onMouseWheel0
             , onClickStop (SelectItem Nothing)
             , Html.Attributes.style
                 [ "background-position" => ((toString gx) ++ " " ++ (toString gy))
@@ -77,7 +77,7 @@ drawProcess model calc process =
             jacks |> List.filter (not << isConnected model)
 
         attrs =
-            [ onMouseDown' <| DragProcess process
+            [ onMouseDown0 <| DragProcess process
             , rx "10"
             , ry "10"
             , x (toString <| -w / 2)
@@ -119,7 +119,7 @@ drawProcess model calc process =
             rect boxAttrs []
 
         textContent =
-            text' textAttrs [ (text process.name) ]
+            text_ textAttrs [ (text process.name) ]
 
         head =
             g [] [ textBox, textContent ]
@@ -166,7 +166,7 @@ drawJack model calc jack =
 
         outline =
             Svg.path
-                ([ onMouseDown' <| DragJack jack
+                ([ onMouseDown0 <| DragJack jack
                  , onMouseUp <| DragEndTargetJack jack
                  , d <| Shape.chevron Shape.jackDimensions
                  , Html.Attributes.style
@@ -186,7 +186,7 @@ drawJack model calc jack =
                 []
 
         contentName =
-            text'
+            text_
                 [ x <| toString (w / 2 - 10)
                 , y <| toString (-h / 5)
                 , alignmentBaseline "middle"
@@ -197,7 +197,7 @@ drawJack model calc jack =
                 [ text <| jack.name ]
 
         contentQuantity =
-            text'
+            text_
                 [ x <| toString (w / 2 - 10)
                 , y <| toString (h / 5)
                 , alignmentBaseline "middle"
@@ -360,7 +360,7 @@ drawContainer model calc container =
                     Noop
                 else
                     (RemoveContainer container)
-            , onMouseDown' <| DragContainer container
+            , onMouseDown0 <| DragContainer container
             , onMouseUp <| DragEndTargetContainer container
             , Html.Attributes.style
                 [ "cursor" => "move"
@@ -374,10 +374,10 @@ drawContainer model calc container =
             [ Svg.clipPath [ id clipID ] [ use [ xlinkHref <| "#" ++ circleID ] [] ]
             , circle circleAttrs []
             , rect rectAttrs []
-            , text' nameAttrs [ text container.name ]
-            , text' amountAttrs [ text amountDisplay ]
+            , text_ nameAttrs [ text container.name ]
+            , text_ amountAttrs [ text amountDisplay ]
             , line dividerAttrs []
-            , text' capacityAttrs [ text capacityDisplay ]
+            , text_ capacityAttrs [ text capacityDisplay ]
             ]
 
 
@@ -413,7 +413,7 @@ drawLink ({ containerByID, jackByID } as model) calc link =
 
         flowDisplay =
             Dict.get jack.id calc.jackByID
-                |> map (toString << .flow)
+                |> Maybe.map (toString << .flow)
                 |> withDefault "???"
 
         stripeColor =
@@ -471,7 +471,7 @@ drawLink ({ containerByID, jackByID } as model) calc link =
                 []
 
         linkText =
-            text'
+            text_
                 [ alignmentBaseline "bottom"
                 , fill textColor
                 , fontSize "14px"
@@ -541,26 +541,26 @@ isConnected model jack =
                 False
 
 
-onMouseDown' : Draggable -> Attribute Msg
-onMouseDown' target =
+onMouseDown0 : Draggable -> Attribute Msg
+onMouseDown0 target =
     onWithOptions
         "mousedown"
         { preventDefault = True, stopPropagation = True }
         (Json.map (DragStart target) Mouse.position)
 
 
-onMouseWheel' : Attribute Msg
-onMouseWheel' =
+onMouseWheel0 : Attribute Msg
+onMouseWheel0 =
     let
         makeMouseWheelMsg : Int -> Int -> Float -> ( Int, Int ) -> Msg
         makeMouseWheelMsg clientX clientY deltaY dimensions =
             MouseWheelTurn (Mouse.Position clientX clientY) dimensions deltaY
 
         targetDecoder =
-            object2 (,) ("width" := int) ("height" := int)
+            Json.map2 (,) (field "width" int) (field "height" int)
 
         decoder : Json.Decoder Msg
         decoder =
-            object4 makeMouseWheelMsg ("clientX" := int) ("clientY" := int) ("deltaY" := float) ("target" := targetDecoder)
+            Json.map4 makeMouseWheelMsg (field "clientX" int) (field "clientY" int) (field "deltaY" float) (field "target" targetDecoder)
     in
         on "wheel" decoder

@@ -1,7 +1,6 @@
 module Main exposing (..)
 
 import Debug exposing (log)
-import Html.App as App
 import Html exposing (Html)
 import Dict exposing (Dict)
 import Init exposing (init)
@@ -19,7 +18,7 @@ view model =
 
 
 main =
-    App.programWithFlags
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

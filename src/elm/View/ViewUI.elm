@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onInput)
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json exposing (field)
 import Math.Vector2 as V2 exposing (..)
 import Mouse
 import Util exposing (..)
@@ -39,7 +39,7 @@ settingsControl model =
         [ class "settings-control" ]
         [ text "Show inputs/outputs"
         , input
-            [ type' "checkbox"
+            [ type_ "checkbox"
             , checked model.jacksVisible
             , onClick (SetJacksVisible <| not model.jacksVisible)
             ]
@@ -91,12 +91,12 @@ editForm model =
                                         , label
                                             []
                                             [ text "Name"
-                                            , input [ type' "text", value name, onInputStop setName ] []
+                                            , input [ type_ "text", value name, onInputStop setName ] []
                                             ]
                                         , label
                                             []
                                             [ text "Capacity"
-                                            , input [ type' "text", value (toString capacity), onInputStop setCapacity ] []
+                                            , input [ type_ "text", value (toString capacity), onInputStop setCapacity ] []
                                             ]
                                         , div
                                             [ style

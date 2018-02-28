@@ -11,6 +11,7 @@ import Foci exposing (..)
 import Model exposing (..)
 import String
 import Util exposing (..)
+import Tuple exposing (first, second)
 
 
 textOffsetRate =
@@ -60,7 +61,7 @@ manageCache msg model =
     let
         calc model =
             { model
-                | calcCache = snd <| Calc.getCalc model
+                | calcCache = Tuple.second <| Calc.getCalc model
             }
 
         clear model =
@@ -133,7 +134,7 @@ connectJacks model dragJack jack =
                 , initialAmount = 0
                 }
 
-        model' =
+        newModel =
             { model
                 | containerByID = Dict.insert newContainer.id newContainer model.containerByID
             }
@@ -142,13 +143,13 @@ connectJacks model dragJack jack =
         pairs =
             List.map ((,) newContainer) jacks
 
-        model'' =
+        newModel0 =
             List.foldl
                 addLink
-                model'
+                newModel
                 pairs
     in
-        model''
+        newModel0
 
 
 updateHelp : Msg -> Model -> Model
@@ -222,7 +223,7 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
 
                     Just drag ->
                         let
-                            model' =
+                            newModel =
                                 { model | drag = Nothing }
 
                             updateProcessPosition process =
@@ -236,25 +237,25 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
                         in
                             case drag.target of
                                 DragScreen ->
-                                    Focus.update (globalTransform => translate) (add (dragOffset drag)) model'
+                                    Focus.update (globalTransform => translate) (add (dragOffset drag)) newModel
 
                                 DragProcess dragProcess ->
                                     let
                                         attachedJacks =
                                             getJacks model dragProcess
                                     in
-                                        { model'
+                                        { newModel
                                             | processByID = processByID |> Dict.update dragProcess.id (Maybe.map updateProcessPosition)
                                             , jackByID = jackByID |> updateMulti (List.map .id attachedJacks) (Maybe.map updateJackPosition)
                                         }
 
                                 DragContainer dragContainer ->
-                                    { model'
+                                    { newModel
                                         | containerByID = containerByID |> Dict.update dragContainer.id (Maybe.map updateContainerPosition)
                                     }
 
                                 DragJack dragJack ->
-                                    model'
+                                    newModel
 
             RemoveLink link ->
                 removeLink link model
@@ -312,10 +313,10 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
                         in
                             { link | textOffset = link.textOffset + offsetRate }
 
-                    linkByID' =
+                    newLinkByID =
                         linkByID |> Dict.map u
                 in
-                    { model | linkByID = linkByID' }
+                    { model | linkByID = newLinkByID }
 
 
 isValidSimulationState model =
@@ -349,8 +350,8 @@ isTrulyDragging model =
             lengthSquared (dragOffset drag) >= Constants.dragThreshold ^ 2
 
 
-addLink' : ( Container, Jack ) -> Model -> ( Model, Link )
-addLink' ( container, jack ) model =
+addLink0 : ( Container, Jack ) -> Model -> ( Model, Link )
+addLink0 ( container, jack ) model =
     let
         link =
             { id = container.id + jack.id
@@ -359,18 +360,18 @@ addLink' ( container, jack ) model =
             , textOffset = -2000
             }
 
-        linkByID' =
+        newLinkByID =
             Dict.insert link.id link model.linkByID
 
-        model' =
-            { model | linkByID = linkByID' }
+        newModel =
+            { model | linkByID = newLinkByID }
     in
-        ( model', link )
+        ( newModel, link )
 
 
 addLink : ( Container, Jack ) -> Model -> Model
 addLink pair model =
-    fst <| addLink' pair model
+    first <| addLink0 pair model
 
 
 removeLink : Link -> Model -> Model
@@ -383,12 +384,12 @@ removeLink link model =
 removeContainer : Container -> Model -> Model
 removeContainer container model =
     let
-        linkByID' =
+        newLinkByID =
             model.linkByID
                 |> Dict.filter (\id link -> link.containerID /= container.id)
     in
         { model
-            | linkByID = linkByID'
+            | linkByID = newLinkByID
             , containerByID = model.containerByID |> Dict.filter (\id _ -> not (id == container.id))
         }
 

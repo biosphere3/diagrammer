@@ -41,7 +41,7 @@ init flags =
         ( processes, jacks, num ) =
             let
                 step def ( ps, js, i ) =
-                    (parseProcessWithJacks i def) |> \( p, js' ) -> ( p :: ps, js ++ js', i + 1 )
+                    (parseProcessWithJacks i def) |> \( p, js0 ) -> ( p :: ps, js ++ js0, i + 1 )
             in
                 List.foldl step ( [], [], 0 ) flags.library.processes
 
@@ -120,7 +120,7 @@ parseJack : Process -> JackDirection -> Int -> JackDef -> Jack
 parseJack process direction order { name, rate, units, per, state } =
     let
         h =
-            snd Shape.jackDimensions
+            Tuple.second Shape.jackDimensions
 
         y =
             toFloat <| h - h * order
@@ -159,7 +159,7 @@ parseJack process direction order { name, rate, units, per, state } =
         , rate = rate
         , units = units
         , direction = direction
-        , position = process.position `add` offset
+        , position = add process.position offset
         , rect = Shape.jackDimensions
         , matterState = matterState
         }
