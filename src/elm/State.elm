@@ -23,7 +23,7 @@ simulationTickInterval =
 
 
 hardcodedContainerCapacity =
-    1000
+    10000
 
 
 type Msg
@@ -40,6 +40,7 @@ type Msg
     | SetEpoch Int
     | SetPlaying Bool
     | SetJacksVisible Bool
+    | SetIgnoreContainerCapacity Bool
     | TickAnimation Time
     | TickSimulation Time
     | KeyPress Int
@@ -276,17 +277,20 @@ updateHelp msg ({ processByID, jackByID, containerByID, linkByID, drag } as mode
             SetJacksVisible visible ->
                 { model | jacksVisible = visible }
 
+            SetIgnoreContainerCapacity visible ->
+                { model | ignoreContainerCapacity = visible }
+
             SetEpoch epoch ->
                 { model
                     | epoch = epoch
                 }
 
             KeyPress keyCode ->
-                if keyCode == 72 then
-                    -- "h"
-                    { model | jacksVisible = not model.jacksVisible }
-                else
-                    model
+                case keyCode of
+                    72 -> { model | jacksVisible = not model.jacksVisible }
+                    73 -> { model | ignoreContainerCapacity = not model.ignoreContainerCapacity }
+                    _ -> model
+
 
             TickSimulation t ->
                 if not model.playing then
@@ -337,7 +341,7 @@ isValidSimulationState model =
                 |> Dict.filter badCapacity
                 |> Dict.size
     in
-        problems == 0
+        model.ignoreContainerCapacity || problems == 0
 
 
 isTrulyDragging model =

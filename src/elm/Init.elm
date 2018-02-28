@@ -68,6 +68,7 @@ init flags =
           , epoch = 0
           , playing = False
           , jacksVisible = True
+          , ignoreContainerCapacity = False
           , drag = Nothing
           , selected = Nothing
           , globalTransform = { translate = vec2 0 300, scale = 1.0 }

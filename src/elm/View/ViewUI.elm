@@ -36,15 +36,29 @@ view model =
 settingsControl : Model -> Html Msg
 settingsControl model =
     div
-        [ class "settings-control" ]
-        [ text "Show inputs/outputs"
-        , input
-            [ type_ "checkbox"
-            , checked model.jacksVisible
-            , onClick (SetJacksVisible <| not model.jacksVisible)
+        []
+        [ div
+            [ class "settings-control" ]
+            [ text "Show inputs/outputs"
+            , input
+                [ type_ "checkbox"
+                , checked model.jacksVisible
+                , onClick (SetJacksVisible <| not model.jacksVisible)
+                ]
+                []
+            , div [ style [ "fontSize" :> "0.9em", "color" :> "gray" ] ] [ text "(shortcut: Alt+h)" ]
             ]
-            []
-        , div [ style [ "fontSize" :> "0.9em", "color" :> "gray" ] ] [ text "(shortcut: Alt+h)" ]
+        , div
+            [ class "settings-control" ]
+            [ text "Ignore container capacities"
+            , input
+                [ type_ "checkbox"
+                , checked model.ignoreContainerCapacity
+                , onClick (SetIgnoreContainerCapacity <| not model.ignoreContainerCapacity)
+                ]
+                []
+            , div [ style [ "fontSize" :> "0.9em", "color" :> "gray" ] ] [ text "(shortcut: Alt+i)" ]
+            ]
         ]
 
 

@@ -17,6 +17,7 @@ type alias Model =
     , epoch : Int
     , playing : Bool
     , jacksVisible : Bool
+    , ignoreContainerCapacity : Bool
     , calcCache : CalcCache
     , drag : Maybe Drag
     , selected : Maybe Selectable
