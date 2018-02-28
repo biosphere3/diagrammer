@@ -95,6 +95,7 @@ type alias Jack =
         -- the potential amount of flow, TODO: needs to be a function
         Float
     , units : String
+    , per : String
     , direction : JackDirection
     , position : Vec2
     , rect : Rect

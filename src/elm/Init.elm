@@ -159,6 +159,7 @@ parseJack process direction order { name, rate, units, per, state } =
         , processID = process.id
         , rate = rate
         , units = units
+        , per = per
         , direction = direction
         , position = add process.position offset
         , rect = Shape.jackDimensions

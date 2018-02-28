@@ -204,7 +204,7 @@ drawJack model calc jack =
                 , textAnchor "middle"
                 , fill textColor
                 ]
-                [ text <| toString jack.rate ++ " " ++ jack.units ]
+                [ text <| toString jack.rate ++ " " ++ jack.units ++ "/" ++ jack.per ]
     in
         g [ transform <| "translate(" ++ x0 ++ "," ++ y0 ++ ")" ]
             [ outline, contentName, contentQuantity ]
