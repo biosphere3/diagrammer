@@ -4,17 +4,11 @@ processes:
       A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
     image: http://solarcities.eu/sites/default/files/styles/content_medium/public/media/3ibc.png?itok=atrHBT-O
     inputs:
-      - name: Water
+      - name: Waste Slurry
         state: liquid
         temp: 115F
         rate: 5
         units: gal
-        per: day
-      - name: Organic Waste
-        state: solid
-        temp: 60F
-        rate: 1
-        units: kg
         per: day
     outputs:
       - name: Biogas
@@ -34,17 +28,11 @@ processes:
       A biodigester uses methanogenic Archea to decompose organic waste into fertilizer and natural gas. This design is based out of a standard 1000L IBC tank.
     image: http://solarcities.eu/sites/default/files/styles/content_medium/public/media/3ibc.png?itok=atrHBT-O
     inputs:
-      - name: Water
+      - name: Waste Slurry
         state: liquid
         temp: 115F
         rate: 5
         units: gal
-        per: day
-      - name: Organic Waste
-        state: solid
-        temp: 60F
-        rate: 1
-        units: kg
         per: day
     outputs:
       - name: Biogas
@@ -59,24 +47,24 @@ processes:
         rate: 5
         units: gal
         per: day
-  - name: Volo One Stirling Engine
-    excerpt: >
-      The Volo One is a large-scale stirling engine. It is an external combustion that turns heat into rotary motion. It has no inner fuel source and requires little maintenance.
-    image: http://cdn.shopify.com/s/files/1/0487/1257/products/rearview-bear-884-wht_grande.jpg
-    inputs:
-      - name: Heat
-        state: energy
-        temp: null
-        rate: 500000
-        units: BTU
-        per: day
-    outputs:
-      - name: Electricity
-        state: energy
-        temp: null
-        rate: 1
-        units: kwh
-        per: hour
+#  - name: Volo One Stirling Engine
+#    excerpt: >
+#      The Volo One is a large-scale stirling engine. It is an external combustion that turns heat into rotary motion. It has no inner fuel source and requires little maintenance.
+#    image: http://cdn.shopify.com/s/files/1/0487/1257/products/rearview-bear-884-wht_grande.jpg
+#    inputs:
+#      - name: Heat
+#        state: energy
+#        temp: null
+#        rate: 500000
+#        units: BTU
+#        per: day
+#    outputs:
+#      - name: Electricity
+#        state: energy
+#        temp: null
+#        rate: 1
+#        units: kwh
+#        per: hour
   - name: Biogas Stove
     excerpt: >
       The instove is a cookstove/rocket stove that can be easily build and use any type of heat energy for cooking and water heating.
@@ -106,12 +94,18 @@ processes:
         A gas hot water heater can be modified to take heat from any gas stream. This is a standard home water heater, converted to run on exhuast gas from the incinerator
     image: http://ritetechplumbing.ca/wp-content/uploads/2013/10/bradford-white-hot-water-tank.jpg
     inputs:
-      - name: Heat
-        state: energy
-        temp: null
-        rate: 31150
-        units: BTU
-        per: hour
+      - name: Hot Exhuast
+        state: gas
+        temp: 600
+        rate: 3
+        units: m3
+        per: day
+      - name: Clean Water
+        state: liquid
+        temp: 600
+        rate: 3
+        units: m3
+        per: day  
     outputs:
       - name: Hot Water
         state: liquid
@@ -119,12 +113,12 @@ processes:
         rate: 34.6
         units: gal
         per: hour
-      - name: Heat
+      - name: Cooler Exhaust
         state: energy
         temp: null
-        rate: 15000
-        units: BTU
-        per: hour
+        rate: 400
+        units: m3
+        per: day
   - name: Farmbot XL
     excerpt: >
         The showerloop is an open source water recycling shower that saves water and energy by recycling hot water for the duration of the shower.
@@ -142,6 +136,12 @@ processes:
         rate: 4
         units: kWh/m2
         per: day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: .28
+        units: kWh
+        per: day
     outputs:
       - name: Gray Water
         state: liquid
@@ -152,7 +152,7 @@ processes:
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 500
+        rate: 328
         units: Calories
         per: day
       - name: Inedible Biomass
@@ -178,6 +178,12 @@ processes:
         rate: 4
         units: kWh/m2
         per: day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: .28
+        units: kWh
+        per: day
     outputs:
       - name: Gray Water
         state: liquid
@@ -188,7 +194,7 @@ processes:
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 500
+        rate: 328
         units: Calories
         per: day
       - name: Inedible Biomass
@@ -214,6 +220,12 @@ processes:
         rate: 4
         units: kWh/m2
         per: day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: .28
+        units: kWh
+        per: day
     outputs:
       - name: Gray Water
         state: liquid
@@ -224,7 +236,7 @@ processes:
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 500
+        rate: 328
         units: Calories
         per: day
       - name: Inedible Biomass
@@ -250,6 +262,12 @@ processes:
         rate: 4
         units: kWh/m2
         per: day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: .28
+        units: kWh
+        per: day
     outputs:
       - name: Gray Water
         state: liquid
@@ -260,7 +278,7 @@ processes:
       - name: Vegetables
         state: solid
         temp: 65F
-        rate: 500
+        rate: 328
         units: Calories
         per: day
       - name: Inedible Biomass
@@ -336,6 +354,60 @@ processes:
         units: gal
         per: day
   - name: 235 Watt Solar Panel
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: http://www.ecodirect.com/v/vspfiles/photos/Canadian-Solar-CS6P-225PX-2.jpg
+    inputs:
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 5.5
+        units: kwh/m2
+        per: day
+    outputs:
+      - name: Electricity
+        state: energy
+        temp: null
+        rate: 1.4
+        units: kwh
+        per: day
+  - name: 235 Watt Solar Panel 2
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: http://www.ecodirect.com/v/vspfiles/photos/Canadian-Solar-CS6P-225PX-2.jpg
+    inputs:
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 5.5
+        units: kwh/m2
+        per: day
+    outputs:
+      - name: Electricity
+        state: energy
+        temp: null
+        rate: 1.4
+        units: kwh
+        per: day
+  - name: 235 Watt Solar Panel 3
+    excerpt: >
+      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+    image: http://www.ecodirect.com/v/vspfiles/photos/Canadian-Solar-CS6P-225PX-2.jpg
+    inputs:
+      - name: Sunlight
+        state: light
+        temp: null
+        rate: 5.5
+        units: kwh/m2
+        per: day
+    outputs:
+      - name: Electricity
+        state: energy
+        temp: null
+        rate: 1.4
+        units: kwh
+        per: day
+  - name: 235 Watt Solar Panel 4
     excerpt: >
       A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
     image: http://www.ecodirect.com/v/vspfiles/photos/Canadian-Solar-CS6P-225PX-2.jpg
@@ -457,9 +529,9 @@ processes:
       - name: Shaft Power
         state: energy
         temp: null
-        rate: 100
+        rate: 5
         units: Rotations
-        per: Min
+        per: hour
       - name: Sorted Plastic 
         state: solid
         temp: null
@@ -478,22 +550,22 @@ processes:
       A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
     image: https://images-na.ssl-images-amazon.com/images/I/71cAsjTIWxL._SL1250_.jpg
     inputs:
-      - name: Shaft Power
+      - name: Hi RPM Shaft Power
         state: energy
         temp: null
-        rate: 3700
-        units: Rotations
+        rate: 5
+        units: kwh
         per: Min
     outputs:
-      - name: Shaft Power
+      - name: High Torque Shaft Power
         state: energy
         temp: null
-        rate: 100
-        units: Rotations
-        per: Min
+        rate: 4.5
+        units: kwh
+        per: hour
   - name: Small Engine
     excerpt: >
-      A solar panel is a crystalline structure of silicon that captures photons from sunlight and converts them into electrical energy potential (voltage).
+      Excerpt text goes here
     image: http://gmcs.nbed.nb.ca/mste_bbt_site08/Gas_Engine.jpg
     inputs:
       - name: Hydrocarbon Fuel
@@ -512,13 +584,84 @@ processes:
       - name: Shaft Power
         state: energy
         temp: null
-        rate: 3700
-        units: Rotations
-        per: Min
+        rate: 5
+        units: kwh
+        per: hour
       - name: Hot Exhuast
         state: gas
         temp: 300
         rate: 200
         units: Cu/Ft
         per: Day
-        
+  - name: ShowerLoop
+    excerpt: >
+      Excerpt text goes here.
+    image: http://turbiini.net/wp-content/uploads/2015/07/showerloop-e1439968653364.png
+    inputs:
+      - name: Hot Clean Water
+        state: liquid
+        temp: null
+        rate: 5
+        units: Gal
+        per: Day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: 100
+        units: Cu/Ft
+        per: Day
+    outputs:
+      - name: Dirty Water
+        state: liquid
+        temp: null
+        rate: 5
+        units: Gallons
+        per: Day
+  - name: Macerating Toilet
+    excerpt: >
+      Excerpt text goes here.
+    image: https://images-na.ssl-images-amazon.com/images/I/31vvx5ayP9L.jpg
+    inputs:
+      - name: Clean Water
+        state: liquid
+        temp: null
+        rate: 5
+        units: Gal
+        per: Day
+      - name: feces
+        state: energy
+        temp: null
+        rate: 300
+        units: Grams
+        per: Day
+      - name: AC Electricity
+        state: energy
+        temp: null
+        rate: .5
+        units: kwh
+        per: Day
+    outputs:
+      - name: Waste Slurry
+        state: liquid
+        temp: 80F
+        rate: 5
+        units: Gal
+        per: Day
+  - name: Car Alternator
+    excerpt: >
+      Excerpt text goes here.
+    image: https://images-na.ssl-images-amazon.com/images/I/81GtaxVnXmL._SY450_.jpg
+    inputs:
+      - name: Shaft Power
+        state: energy
+        temp: null
+        rate: 10
+        units: kwh
+        per: Day
+    outputs:
+      - name: 14.4 VDC Electricity
+        state: energy
+        temp: null
+        rate: 8
+        units: kwh
+        per: Day
